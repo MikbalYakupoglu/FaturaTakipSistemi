@@ -11,90 +11,94 @@ using FaturaTakip.Models;
 
 namespace FaturaTakip.Controllers
 {
-    public class DebtsController : Controller
+    public class PaymentsController : Controller
     {
         private readonly InvoiceTrackContext _context;
 
-        public DebtsController(InvoiceTrackContext context)
+        public PaymentsController(InvoiceTrackContext context)
         {
             _context = context;
         }
 
-        // GET: Debts
+        // GET: Payments
         public async Task<IActionResult> Index()
         {
-            var invoiceTrackContext = _context.Debts.Include(d => d.Apartment);
+            var invoiceTrackContext = _context.Payments.Include(p => p.Apartment).Include(p => p.Tenant);
             return View(await invoiceTrackContext.ToListAsync());
         }
 
-        // GET: Debts/Details/5
+        // GET: Payments/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Debts == null)
+            if (id == null || _context.Payments == null)
             {
                 return NotFound();
             }
 
-            var debt = await _context.Debts
-                .Include(d => d.Apartment)
+            var payment = await _context.Payments
+                .Include(p => p.Apartment)
+                .Include(p => p.Tenant)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (debt == null)
+            if (payment == null)
             {
                 return NotFound();
             }
 
-            return View(debt);
+            return View(payment);
         }
 
-        // GET: Debts/Create
+        // GET: Payments/Create
         public IActionResult Create()
         {
             ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id");
+            ViewData["FKTenantId"] = new SelectList(_context.Tenants, "Id", "Id");
             return View();
         }
 
-        // POST: Debts/Create
+        // POST: Payments/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Dues,Bill,FKApartmentId")] Debt debt)
+        public async Task<IActionResult> Create([Bind("Id,Amount,FKTenantId,FKApartmentId")] Payment payment)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(debt);
+                _context.Add(payment);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id", debt.FKApartmentId);
-            return View(debt);
+            ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id", payment.FKApartmentId);
+            ViewData["FKTenantId"] = new SelectList(_context.Tenants, "Id", "Id", payment.FKTenantId);
+            return View(payment);
         }
 
-        // GET: Debts/Edit/5
+        // GET: Payments/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Debts == null)
+            if (id == null || _context.Payments == null)
             {
                 return NotFound();
             }
 
-            var debt = await _context.Debts.FindAsync(id);
-            if (debt == null)
+            var payment = await _context.Payments.FindAsync(id);
+            if (payment == null)
             {
                 return NotFound();
             }
-            ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id", debt.FKApartmentId);
-            return View(debt);
+            ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id", payment.FKApartmentId);
+            ViewData["FKTenantId"] = new SelectList(_context.Tenants, "Id", "Id", payment.FKTenantId);
+            return View(payment);
         }
 
-        // POST: Debts/Edit/5
+        // POST: Payments/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Dues,Bill,FKApartmentId")] Debt debt)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Amount,FKTenantId,FKApartmentId")] Payment payment)
         {
-            if (id != debt.Id)
+            if (id != payment.Id)
             {
                 return NotFound();
             }
@@ -103,12 +107,12 @@ namespace FaturaTakip.Controllers
             {
                 try
                 {
-                    _context.Update(debt);
+                    _context.Update(payment);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!DebtExists(debt.Id))
+                    if (!PaymentExists(payment.Id))
                     {
                         return NotFound();
                     }
@@ -119,51 +123,53 @@ namespace FaturaTakip.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id", debt.FKApartmentId);
-            return View(debt);
+            ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id", payment.FKApartmentId);
+            ViewData["FKTenantId"] = new SelectList(_context.Tenants, "Id", "Id", payment.FKTenantId);
+            return View(payment);
         }
 
-        // GET: Debts/Delete/5
+        // GET: Payments/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Debts == null)
+            if (id == null || _context.Payments == null)
             {
                 return NotFound();
             }
 
-            var debt = await _context.Debts
-                .Include(d => d.Apartment)
+            var payment = await _context.Payments
+                .Include(p => p.Apartment)
+                .Include(p => p.Tenant)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (debt == null)
+            if (payment == null)
             {
                 return NotFound();
             }
 
-            return View(debt);
+            return View(payment);
         }
 
-        // POST: Debts/Delete/5
+        // POST: Payments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Debts == null)
+            if (_context.Payments == null)
             {
-                return Problem("Entity set 'InvoiceTrackContext.Debts'  is null.");
+                return Problem("Entity set 'InvoiceTrackContext.Payments'  is null.");
             }
-            var debt = await _context.Debts.FindAsync(id);
-            if (debt != null)
+            var payment = await _context.Payments.FindAsync(id);
+            if (payment != null)
             {
-                _context.Debts.Remove(debt);
+                _context.Payments.Remove(payment);
             }
             
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool DebtExists(int id)
+        private bool PaymentExists(int id)
         {
-          return _context.Debts.Any(e => e.Id == id);
+          return _context.Payments.Any(e => e.Id == id);
         }
     }
 }

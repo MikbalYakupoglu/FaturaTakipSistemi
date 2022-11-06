@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +6,7 @@ using FaturaTakip.Data;
 using Type = FaturaTakip.Data.Models.Type;
 using FaturaTakip.Utils;
 using FaturaTakip.Data.Models;
+using FaturaTakip.Models;
 
 namespace FaturaTakip.Controllers
 {
@@ -63,10 +60,10 @@ namespace FaturaTakip.Controllers
             if (ModelState.IsValid)
             {
                 _context.Add(apartment);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-
+                 await _context.SaveChangesAsync();
+                 return RedirectToAction(nameof(Index));
             }
+
             SetBlockAndTypeData();
             return View(apartment);
         }

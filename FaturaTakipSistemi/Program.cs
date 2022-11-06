@@ -1,3 +1,4 @@
+using AutoMapper;
 using FaturaTakip.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +11,7 @@ builder.Services.AddDbContext<InvoiceTrackContext>(options =>
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter(); // TODO : Development
 builder.Services.AddControllersWithViews();
+//builder.Services.AddAutoMapper(typeof(Program));
 
 var app = builder.Build();
 
