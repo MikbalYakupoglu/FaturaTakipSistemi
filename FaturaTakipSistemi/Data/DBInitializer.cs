@@ -65,10 +65,12 @@ namespace FaturaTakip.Data
                 new Tenant
                 {
                     Name = "Muhammet", LastName = "Kaya", Email = "muhammet.kaya@test.com", GovermentId = "30015652142",
-                    PhoneNumber = "5456325561", LisencePlate = "54KF512"
+                    Phone = "5456325561", LisencePlate = "54KF512"
                 }
             };
 
+            context.Tenants.AddRange(tenants);
+            context.SaveChanges();
         }
     }
 }

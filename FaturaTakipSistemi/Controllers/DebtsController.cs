@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using FaturaTakip.Data;
 using FaturaTakip.Data.Models;
+using FaturaTakip.Models;
 
 namespace FaturaTakip.Controllers
 {
@@ -57,7 +58,7 @@ namespace FaturaTakip.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Dues,Bill,Id")] Debt debt)
+        public async Task<IActionResult> Create([Bind("Id,Dues,Bill,FKApartmentId")] Debt debt)
         {
             if (ModelState.IsValid)
             {
@@ -91,7 +92,7 @@ namespace FaturaTakip.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Dues,Bill,Id")] Debt debt)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Dues,Bill,FKApartmentId")] Debt debt)
         {
             if (id != debt.Id)
             {
