@@ -1,14 +1,21 @@
-﻿using FaturaTakip.Data;
+﻿using AutoMapper;
+using FaturaTakip.Data;
+using FaturaTakip.Data.Models;
 using FaturaTakip.Data.Models.Abstract;
 using FaturaTakip.Models;
 using FaturaTakip.Utils;
 using Microsoft.AspNetCore.Mvc;
+using NuGet.Protocol.Plugins;
+using System.Net;
+using WebApplication1.Controllers;
+using System.Web;
 
 namespace FaturaTakip.Controllers
 {
     public class AuthController : Controller
     {
         private readonly InvoiceTrackContext _context;
+        private bool _userLogined = false;
 
         public AuthController(InvoiceTrackContext context)
         {
