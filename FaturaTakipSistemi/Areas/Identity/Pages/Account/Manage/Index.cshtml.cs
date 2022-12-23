@@ -51,13 +51,36 @@ namespace FaturaTakip.Areas.Identity.Pages.Account.Manage
         /// </summary>
         public class InputModel
         {
+            [Required]
+            [Display(Name = "Name")]
+            [StringLength(50)]
+            public string Name { get; set; }
+            
+            [Required]
+            [Display(Name = "LastName")]
+            [StringLength(50)]
+            public string LastName { get; set; }
+
+
+            [Required]
+            [Display(Name = "GovermentId")]
+            [StringLength(11)]
+            public string GovermentId { get; set; }
+
+            [Required]
+            [Display(Name = "YearOfBirth")]
+            [Range(1900, 2022)]
+            public int YearOfBirth { get; set; }
+
+            [Required]
+            [Display(Name = "Phone")]
+            [StringLength(10)]
+            [Phone]
+            public string Phone { get; set; }
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
-            [Phone]
-            [Display(Name = "Phone number")]
-            public string PhoneNumber { get; set; }
         }
 
         private async Task LoadAsync(InvoiceTrackUser user)
@@ -69,7 +92,11 @@ namespace FaturaTakip.Areas.Identity.Pages.Account.Manage
 
             Input = new InputModel
             {
-                PhoneNumber = phoneNumber
+                Name = user.Name,
+                LastName = user.LastName,
+                GovermentId = user.GovermentId,
+                Phone = phoneNumber,
+                YearOfBirth = user.YearOfBirth
             };
         }
 
@@ -100,14 +127,34 @@ namespace FaturaTakip.Areas.Identity.Pages.Account.Manage
             }
 
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
-            if (Input.PhoneNumber != phoneNumber)
+            if (Input.Phone != phoneNumber)
             {
-                var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
+                var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.Phone);
                 if (!setPhoneResult.Succeeded)
                 {
                     StatusMessage = "Unexpected error when trying to set phone number.";
                     return RedirectToPage();
                 }
+            }
+
+            if(Input.Name != user.Name)
+            {
+                user.Name = Input.Name;
+            }
+
+            if (Input.LastName != user.LastName)
+            {
+                user.LastName = Input.LastName;
+            }
+
+            if (Input.GovermentId != user.GovermentId)
+            {
+                user.GovermentId= Input.GovermentId;
+            }
+
+            if (Input.YearOfBirth != user.YearOfBirth)
+            {
+                user.YearOfBirth= Input.YearOfBirth;
             }
 
             await _signInManager.RefreshSignInAsync(user);

@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
+using FaturaTakip.Data.Models.Abstract;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -79,12 +80,12 @@ namespace FaturaTakip.Areas.Identity.Pages.Account
             [Display(Name = "Email")]
             public string Email { get; set; }
 
-            /// <summary>
+            /// <summary> 
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
             [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 3)]
             [DataType(DataType.Password)]
             [Display(Name = "Password")]
             public string Password { get; set; }
@@ -97,6 +98,33 @@ namespace FaturaTakip.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
+
+            [Required]
+            [Display(Name = "Name")]
+            [StringLength(50)]
+            public string Name { get; set; }
+
+            [Required]
+            [Display(Name = "LastName")]
+            [StringLength(50)]
+            public string LastName { get; set; }
+
+
+            [Required]
+            [Display(Name = "GovermentId")]
+            [StringLength(11)]
+            public string GovermentId { get; set; }
+
+            [Required]
+            [Display(Name = "YearOfBirth")]
+            [Range(1900, 2022)]
+            public int YearOfBirth { get; set; }
+
+            [Required]
+            [Display(Name = "Phone")]
+            [StringLength(10)]
+            public string Phone { get; set; }
+
         }
 
 
@@ -113,6 +141,11 @@ namespace FaturaTakip.Areas.Identity.Pages.Account
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
+
+                user.Name = Input.Name;
+                user.LastName = Input.LastName;
+                user.GovermentId = Input.GovermentId;
+                user.YearOfBirth = Input.YearOfBirth;
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
