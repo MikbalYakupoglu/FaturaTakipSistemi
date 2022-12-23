@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
-using FaturaTakip.Data.Models;
+﻿using FaturaTakip.Data.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace FaturaTakip.Data
 {
-    public class InvoiceTrackContext : DbContext
+    public class InvoiceTrackContext : IdentityDbContext<InvoiceTrackUser>
     {
         public InvoiceTrackContext(DbContextOptions<InvoiceTrackContext> options) : base(options)
         {
@@ -26,6 +22,10 @@ namespace FaturaTakip.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<IdentityUserLogin<string>>().HasKey(l => l.UserId);
+            modelBuilder.Entity<IdentityUserRole<string>>().HasKey(l => l.RoleId);
+            modelBuilder.Entity<IdentityUserToken<string>>().HasNoKey();
+
             modelBuilder.Entity<Apartment>().ToTable("Apartments");
             modelBuilder.Entity<Debt>().ToTable("Debts");
             modelBuilder.Entity<Landlord>().ToTable("Landlords");

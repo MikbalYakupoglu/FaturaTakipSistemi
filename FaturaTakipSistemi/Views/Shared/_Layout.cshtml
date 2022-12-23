@@ -22,7 +22,7 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
-                        
+
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false" style="color: red
                                                                                                                             ">Admin Panel</a>
@@ -37,6 +37,14 @@
                                 @*<li><a class="dropdown-item" href="">Something else here</a></li>*@
                             </ul>
                         </li>
+
+                        <li class="nav-item" style="float: right">
+                            <a class="nav-link text-dark" asp-area="Identity" asp-controller="Account" asp-action="Login">Login</a>
+                        </li>
+                        <li class="nav-item" style="float: right">
+                            <a class="nav-link text-dark" asp-area="Identity" asp-controller="Account" asp-action="Register">Register</a>
+                        </li>
+
 
                     </ul>
                 </div>
