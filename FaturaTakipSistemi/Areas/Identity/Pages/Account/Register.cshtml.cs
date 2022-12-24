@@ -146,6 +146,7 @@ namespace FaturaTakip.Areas.Identity.Pages.Account
                 user.LastName = Input.LastName;
                 user.GovermentId = Input.GovermentId;
                 user.YearOfBirth = Input.YearOfBirth;
+                user.Phone = Input.Phone;
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);

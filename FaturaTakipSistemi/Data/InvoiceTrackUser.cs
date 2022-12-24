@@ -14,10 +14,10 @@ public class InvoiceTrackUser : IdentityUser
 
     [StringLength(50)]    public string LastName { get; set; }
 
-    [StringLength(11)]    public string? GovermentId { get; set; }
+    [StringLength(11)]    public string GovermentId { get; set; }
 
-    [Range(1900, 2022)]   public int? YearOfBirth { get; set; }
+    [Range(1900, 2022)]   public int YearOfBirth { get; set; }
 
-    [StringLength(10)]    public string? Phone { get; set; }
+    [StringLength(10)]    public string Phone { get; set; }
 }
 

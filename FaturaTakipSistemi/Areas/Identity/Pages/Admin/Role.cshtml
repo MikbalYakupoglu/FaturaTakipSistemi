@@ -1,0 +1,41 @@
+﻿@page
+@model RoleModel
+
+@using FaturaTakip.Areas.Identity.Pages.Admin;
+@inject RoleManager<IdentityRole> roleManager;
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="row">
+    <div class="col-md-4">
+        <section>
+            <form id="role" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="Input.RoleName"></label>
+                    <input asp-for="Input.RoleName" class="form-control" />
+                    <span asp-validation-for="Input.RoleName" class="text-danger"></span>
+                </div>
+                <div>
+                    <button id="create-role" type="submit" class="w-100 btn btn-lg btn-primary">Create</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+
+<div>
+    <ul>
+        <h4>Roles</h4>
+        @foreach (var item in roleManager.Roles)
+        {
+            <li>@item.Name</li>
+        }
+    </ul>
+</div>
+
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

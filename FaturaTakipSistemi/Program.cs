@@ -20,7 +20,9 @@ builder.Services.AddDefaultIdentity<InvoiceTrackUser>(options =>
     options.Password.RequiredUniqueChars = 0;
     options.Password.RequiredLength = 3;
 })
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<InvoiceTrackContext>();
+
 
 
 // Globalization : https://learn.microsoft.com/en-us/aspnet/core/fundamentals/localization?view=aspnetcore-6.0

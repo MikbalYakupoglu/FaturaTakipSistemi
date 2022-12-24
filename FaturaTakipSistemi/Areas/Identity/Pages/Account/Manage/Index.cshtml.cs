@@ -86,7 +86,6 @@ namespace FaturaTakip.Areas.Identity.Pages.Account.Manage
         private async Task LoadAsync(InvoiceTrackUser user)
         {
             var userName = await _userManager.GetUserNameAsync(user);
-            var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
 
             Username = userName;
 
@@ -95,7 +94,7 @@ namespace FaturaTakip.Areas.Identity.Pages.Account.Manage
                 Name = user.Name,
                 LastName = user.LastName,
                 GovermentId = user.GovermentId,
-                Phone = phoneNumber,
+                Phone = user.Phone,
                 YearOfBirth = user.YearOfBirth
             };
         }
@@ -156,6 +155,13 @@ namespace FaturaTakip.Areas.Identity.Pages.Account.Manage
             {
                 user.YearOfBirth= Input.YearOfBirth;
             }
+
+            if (Input.Phone != user.Phone)
+            {
+                user.Phone = Input.Phone;
+            }
+
+            await _userManager.UpdateAsync(user);
 
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";
