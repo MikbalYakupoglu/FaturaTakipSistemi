@@ -1,7 +1,12 @@
-﻿var checkList = document.getElementById('list1');
-checkList.getElementsByClassName('anchor')[0].onclick = function (evt) {
-    if (checkList.classList.contains('visible'))
-        checkList.classList.remove('visible');
-    else
-        checkList.classList.add('visible');
+﻿var expanded = false;
+
+function showCheckboxes() {
+    var checkboxes = document.getElementById("checkboxes");
+    if (!expanded) {
+        checkboxes.style.display = "block";
+        expanded = true;
+    } else {
+        checkboxes.style.display = "none";
+        expanded = false;
+    }
 }

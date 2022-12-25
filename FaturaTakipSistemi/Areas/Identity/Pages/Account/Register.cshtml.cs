@@ -30,13 +30,15 @@ namespace FaturaTakip.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<InvoiceTrackUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
         public RegisterModel(
             UserManager<InvoiceTrackUser> userManager,
             IUserStore<InvoiceTrackUser> userStore,
             SignInManager<InvoiceTrackUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -44,6 +46,7 @@ namespace FaturaTakip.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _roleManager = roleManager;
         }
 
         /// <summary>
@@ -147,6 +150,7 @@ namespace FaturaTakip.Areas.Identity.Pages.Account
                 user.GovermentId = Input.GovermentId;
                 user.YearOfBirth = Input.YearOfBirth;
                 user.PhoneNumber = Input.PhoneNumber;
+ 
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
@@ -167,6 +171,14 @@ namespace FaturaTakip.Areas.Identity.Pages.Account
 
                     await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
                         $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+
+                    var unknownRole = _roleManager.Roles.First(r => r.Name == "unknown").Name;
+                    var roleResult = await _userManager.AddToRoleAsync(user, unknownRole);
+
+                    if(!roleResult.Succeeded)
+                    {
+                        _logger.LogError(result.Errors.ToString());
+                    }
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {

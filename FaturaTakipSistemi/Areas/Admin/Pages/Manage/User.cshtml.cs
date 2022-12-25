@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 namespace FaturaTakip.Areas.Admin.Pages.Manage
@@ -8,11 +9,16 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
     public class UserModel : PageModel
     {
         private readonly UserManager<InvoiceTrackUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ILogger<UserModel> _logger;
-        public UserModel(UserManager<InvoiceTrackUser> userManager, ILogger<UserModel> logger)
+        public UserModel(
+            UserManager<InvoiceTrackUser> userManager, 
+            ILogger<UserModel> logger,
+            RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _logger = logger;
+            _roleManager = roleManager;
         }
 
         [BindProperty]
@@ -20,6 +26,7 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
 
         [TempData]
         public string StatusMessage { get; set; }
+        public List<IdentityRole> AllRoles { get; set; }
 
         [BindProperty]
         public InputModel Input { get; set; }
@@ -62,6 +69,7 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
                 Email = user.Email,
                 Roles = (List<string>)await _userManager.GetRolesAsync(user)
             };
+            AllRoles = await _roleManager.Roles.ToListAsync();
         }
 
         public async Task<IActionResult> OnGetAsync(Guid id)

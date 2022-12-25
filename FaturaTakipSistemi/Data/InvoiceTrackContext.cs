@@ -23,7 +23,7 @@ namespace FaturaTakip.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<IdentityUserLogin<string>>().HasKey(l => l.UserId);
-            modelBuilder.Entity<IdentityUserRole<string>>().HasKey(l => l.RoleId);
+            modelBuilder.Entity<IdentityUserRole<string>>().HasKey(l => new {l.UserId, l.RoleId });
             modelBuilder.Entity<IdentityUserToken<string>>().HasNoKey();
 
             modelBuilder.Entity<Apartment>().ToTable("Apartments");
