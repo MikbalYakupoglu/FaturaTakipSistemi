@@ -76,11 +76,7 @@ namespace FaturaTakip.Areas.Identity.Pages.Account.Manage
             [Display(Name = "Phone")]
             [StringLength(10)]
             [Phone]
-            public string Phone { get; set; }
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
+            public string PhoneNumber { get; set; }
         }
 
         private async Task LoadAsync(InvoiceTrackUser user)
@@ -94,7 +90,7 @@ namespace FaturaTakip.Areas.Identity.Pages.Account.Manage
                 Name = user.Name,
                 LastName = user.LastName,
                 GovermentId = user.GovermentId,
-                Phone = user.Phone,
+                PhoneNumber = user.PhoneNumber,
                 YearOfBirth = user.YearOfBirth
             };
         }
@@ -126,9 +122,9 @@ namespace FaturaTakip.Areas.Identity.Pages.Account.Manage
             }
 
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
-            if (Input.Phone != phoneNumber)
+            if (Input.PhoneNumber != phoneNumber)
             {
-                var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.Phone);
+                var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
                 if (!setPhoneResult.Succeeded)
                 {
                     StatusMessage = "Unexpected error when trying to set phone number.";
@@ -156,13 +152,7 @@ namespace FaturaTakip.Areas.Identity.Pages.Account.Manage
                 user.YearOfBirth= Input.YearOfBirth;
             }
 
-            if (Input.Phone != user.Phone)
-            {
-                user.Phone = Input.Phone;
-            }
-
             await _userManager.UpdateAsync(user);
-
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";
             return RedirectToPage();

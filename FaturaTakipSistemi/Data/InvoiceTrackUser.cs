@@ -18,6 +18,5 @@ public class InvoiceTrackUser : IdentityUser
 
     [Range(1900, 2022)]   public int YearOfBirth { get; set; }
 
-    [StringLength(10)]    public string Phone { get; set; }
 }
 

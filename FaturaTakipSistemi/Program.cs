@@ -1,4 +1,5 @@
 using FaturaTakip.Data;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -49,11 +50,6 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapRazorPages();
-
 app.MapControllerRoute(
     name: "MyArea",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
@@ -61,5 +57,9 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapRazorPages();
 
 app.Run();

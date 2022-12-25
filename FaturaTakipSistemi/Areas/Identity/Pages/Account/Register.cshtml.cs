@@ -123,7 +123,7 @@ namespace FaturaTakip.Areas.Identity.Pages.Account
             [Required]
             [Display(Name = "Phone")]
             [StringLength(10)]
-            public string Phone { get; set; }
+            public string PhoneNumber { get; set; }
 
         }
 
@@ -146,7 +146,7 @@ namespace FaturaTakip.Areas.Identity.Pages.Account
                 user.LastName = Input.LastName;
                 user.GovermentId = Input.GovermentId;
                 user.YearOfBirth = Input.YearOfBirth;
-                user.Phone = Input.Phone;
+                user.PhoneNumber = Input.PhoneNumber;
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);

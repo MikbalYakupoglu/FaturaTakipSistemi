@@ -1,7 +1,9 @@
 ﻿@page
 @model RoleModel
 
-@using FaturaTakip.Areas.Identity.Pages.Admin;
+@using FaturaTakip.Areas.Admin.Pages.Manage;
+@using Microsoft.AspNetCore.Identity;
+@using Microsoft.AspNetCore.Authentication;
 @inject RoleManager<IdentityRole> roleManager;
 
 <h1>@ViewData["Title"]</h1>
@@ -33,7 +35,6 @@
         }
     </ul>
 </div>
-
 
 
 @section Scripts {

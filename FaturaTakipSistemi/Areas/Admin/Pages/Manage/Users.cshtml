@@ -1,0 +1,59 @@
+﻿@page
+@model UsersModel
+
+@using FaturaTakip.Areas.Admin.Pages.Manage;
+@inject UserManager<InvoiceTrackUser> userManager;
+
+@{
+    var users = userManager.Users.ToList();
+    var roles = new Dictionary<InvoiceTrackUser, List<string>>();
+    foreach (var user in users)
+    {
+        roles[user] = userManager.GetRolesAsync(user).Result.ToList();
+    }
+}
+
+
+@{
+    ViewData["Title"] = "Users";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Goverment ID</th>
+            <th>Name</th>
+            <th>Last Name</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Manage</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in users)
+        {
+            <tr>
+                <td>@user.GovermentId</td>
+                <td>@user.Name</td>
+                <td>@user.LastName</td>
+                <td>@user.PhoneNumber</td>
+                <td>@user.Email</td>
+                <td>
+                    @{
+                        foreach (var role in roles[user])
+                        {
+                            @role
+                            <br />
+                        }
+                    }
+                </td>
+                <td>
+                    <a class="btn btn-primary" href="User/@user.Id">Edit</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
