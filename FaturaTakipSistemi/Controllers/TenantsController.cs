@@ -70,7 +70,7 @@ namespace FaturaTakip.Controllers
                     return View(tenant);
                 }
 
-                CreatePasswordHash(tenant, "123456");
+                //CreatePasswordHash(tenant, "123456");
 
                 _context.Add(tenant);
                 await _context.SaveChangesAsync();
@@ -173,13 +173,13 @@ namespace FaturaTakip.Controllers
           return _context.Tenants.Any(e => e.Id == id);
         }
 
-        private static void CreatePasswordHash<T>(T user, string password) where  T : User
-        {
-            byte[] passwordHash, passwordSalt;
-            HashingHelper.CreatePasswordHash(password, out passwordHash, out passwordSalt);
+        //private static void CreatePasswordHash<T>(T user, string password) where  T : User
+        //{
+        //    byte[] passwordHash, passwordSalt;
+        //    HashingHelper.CreatePasswordHash(password, out passwordHash, out passwordSalt);
 
-            user.PasswordHash = passwordHash;
-            user.PasswordSalt = passwordSalt;
-        }
+        //    user.PasswordHash = passwordHash;
+        //    user.PasswordSalt = passwordSalt;
+        //}
     }
 }

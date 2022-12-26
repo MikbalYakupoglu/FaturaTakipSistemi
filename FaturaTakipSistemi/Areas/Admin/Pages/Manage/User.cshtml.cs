@@ -1,8 +1,14 @@
+using FaturaTakip.Data.Models.Abstract;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using NuGet.Packaging;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace FaturaTakip.Areas.Admin.Pages.Manage
 {
@@ -12,7 +18,7 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ILogger<UserModel> _logger;
         public UserModel(
-            UserManager<InvoiceTrackUser> userManager, 
+            UserManager<InvoiceTrackUser> userManager,
             ILogger<UserModel> logger,
             RoleManager<IdentityRole> roleManager)
         {
@@ -23,14 +29,13 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
 
         [BindProperty]
         public Guid Id { get; set; }
-
-        [TempData]
-        public string StatusMessage { get; set; }
-        public List<IdentityRole> AllRoles { get; set; }
-
+        [BindProperty]
+        public List<string> AllRoleNames { get; set; }
         [BindProperty]
         public InputModel Input { get; set; }
 
+        [TempData]
+        public string StatusMessage { get; set; }
         public class InputModel
         {
             [Required]
@@ -56,20 +61,45 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
             public string Email { get; set; }
 
             //[Required]
+            //public Dictionary<string,bool>? Roles { get; set; }
             public List<string>? Roles { get; set; }
+
         }
 
         private async Task LoadAsync(InvoiceTrackUser user)
         {
+            AllRoleNames = _roleManager.Roles.ToList().Select(x => x.Name).ToList();
+
+            //AllRoleNames = new List<string>();
+            //var allRoles = await _roleManager.Roles.ToListAsync();
+            //List<string> roleNames = allRoles.Select(r => r.Name).ToList();
+            //AllRoleNames.AddRange(roleNames);
+
             Input = new InputModel
             {
                 Name = user.Name,
                 LastName = user.LastName,
                 PhoneNumber = user.PhoneNumber,
                 Email = user.Email,
-                Roles = (List<string>)await _userManager.GetRolesAsync(user)
+                //Roles = AllRoleNames.ToDictionary(r => r, b => false)
+                Roles = new List<string>()
             };
-            AllRoles = await _roleManager.Roles.ToListAsync();
+
+            await GetSelectedRoles(user);
+        }
+
+        private async Task GetSelectedRoles(InvoiceTrackUser user)
+        {
+            var userRoles = await _userManager.GetRolesAsync(user);
+            foreach (var allRole in AllRoleNames)
+            {
+                foreach (var userRole in userRoles)
+                {
+                    if (allRole == userRole)
+                        Input.Roles.Add(allRole);
+                }
+                //Input.Roles[item] = await _userManager.IsInRoleAsync(user, item) ? true : false;
+            }
         }
 
         public async Task<IActionResult> OnGetAsync(Guid id)
@@ -87,7 +117,15 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
 
         public async Task<IActionResult> OnPostAsync()
         {
+            AllRoleNames = _roleManager.Roles.ToList().Select(x => x.Name).ToList();
+
+            foreach (string roleName in AllRoleNames) 
+            {
+                _logger.LogCritical(roleName);
+            }
+
             var user = await _userManager.FindByIdAsync(Id.ToString());
+
             if (user == null)
             {
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
@@ -95,6 +133,7 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
 
             if (!ModelState.IsValid)
             {
+                StatusMessage = "Error : Model Error.";
                 return Page();
             }
 
@@ -131,17 +170,73 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
                 user.LastName = Input.LastName;
             }
 
-            //var userRole = await _userManager.GetRolesAsync(user);
-            //if (Input.Roles != userRole)
-            //{
-            //    var itemsToAdd = Input.Roles.Except(userRole);
-            //    userRole = userRole.Union(itemsToAdd).ToList();
-            //}
+            var updateResult = await UpdateUserRoles(user);
+            if (!updateResult)
+            {
+                return RedirectToPage();
+            }
 
             await _userManager.UpdateAsync(user);
-            //await _userManager.AddToRolesAsync(user, userRole);
             StatusMessage = "Your profile has been updated";
             return RedirectToPage();
+        }
+
+        private async Task<bool> UpdateUserRoles(InvoiceTrackUser user)
+        {
+            List<string> rolesToRemove = new List<string>();
+
+            var userRoles = await _userManager.GetRolesAsync(user);
+
+
+            if (Input.Roles?.Count > 0)
+            {
+                rolesToRemove = userRoles.Except(Input.Roles, StringComparer.Ordinal).ToList();
+            }
+            else
+            {
+                rolesToRemove = userRoles.ToList();
+            }
+
+
+            if (rolesToRemove.Count > 0)
+            {
+                var deleteResult = await _userManager.RemoveFromRolesAsync(user, rolesToRemove);
+
+                if (!deleteResult.Succeeded)
+                {
+                    StatusMessage = "Error : Role Delete Error.";
+                    return false;
+
+                }
+            }
+
+            if (Input.Roles?.Count > 0)
+            {
+                var rolesToAdd = Input.Roles.Except(userRoles, StringComparer.Ordinal).ToList();
+
+                var addResult = await _userManager.AddToRolesAsync(user, rolesToAdd);
+                if (!addResult.Succeeded)
+                {
+                    StatusMessage = "Error : Role Add Error.";
+                    return false;
+                }
+            }
+
+
+            userRoles = await _userManager.GetRolesAsync(user);
+            if (userRoles.Count == 0)
+            {
+                var addDefaultUnknownRoleResult = await _userManager.AddToRoleAsync(user, "unknown");
+
+                if (!addDefaultUnknownRoleResult.Succeeded)
+                {
+                    StatusMessage = "Error : Add Default Unknown Role Error.";
+                    return false;
+                }
+            }
+
+
+            return true;
         }
     }
 }

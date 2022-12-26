@@ -21,6 +21,5 @@ public abstract class User
 
     [StringLength(10)]
     public string Phone { get; set; }
-    public byte[]? PasswordHash { get; set; }
-    public byte[]? PasswordSalt{ get; set; }
+
 }

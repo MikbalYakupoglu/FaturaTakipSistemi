@@ -10,3 +10,10 @@ function showCheckboxes() {
         expanded = false;
     }
 }
+//-----------------------------------------------------
+
+$(document).ready(function () {
+    $('#SelectedRoles input[type="checkbox"]').on('click', function () {
+        $(this).attr('checked', !$(this).attr('checked'));
+    });
+});

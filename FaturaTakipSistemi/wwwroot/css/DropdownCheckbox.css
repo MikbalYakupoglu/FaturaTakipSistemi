@@ -31,3 +31,34 @@
 #checkboxes label:hover {
   background-color: #1e90ff;
 }
+
+/*----------------------------------------------------*/
+
+select[multiple] option {
+    display: block;
+    width: 100%;
+    margin-bottom: 0.5em;
+    padding: 0.25em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+    select[multiple] option:before {
+        content: "";
+        display: inline-block;
+        width: 1.5em;
+        height: 1.5em;
+        margin-right: 0.5em;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background-color: white;
+        vertical-align: middle;
+    }
+
+    select[multiple] option:checked:before {
+        content: "\2713";
+        font-size: 1.5em;
+        line-height: 1.5;
+        color: white;
+        background-color: #007bff;
+    }

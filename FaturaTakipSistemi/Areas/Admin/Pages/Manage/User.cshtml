@@ -3,14 +3,27 @@
 
 @using FaturaTakip.Areas.Admin.Pages.Manage
 @inject UserManager<InvoiceTrackUser> userManager
+@inject ILogger<UserModel> _logger;
 
 @{
     var user = await userManager.FindByIdAsync(Model.Id.ToString());
+    //var selectList = Model.AllRoleNames.Select
+    //(role => new SelectListItem { Value = role, Text = role, Selected = Model.Input.Roles[role] }).ToList();
 }
 <head>
     <title>Edit User</title>
     <link rel="stylesheet" href="~/css/DropdownCheckbox.css" asp-append-version="true" />
     <script src="~/js/DropdownCheckbox.js"></script>
+    <script>
+        function submit() {
+            const multiSelect = document.querySelector('#multi-select');
+            if (multiSelect.selectedOptions.length > 0) {
+                console.log('process submit');
+            } else {
+                console.log('Please select atleast 1 options');
+            }
+        }
+    </script>
 </head>
 <body>
     <partial name="_StatusMessage" for="StatusMessage" />
@@ -45,25 +58,41 @@
                 <div class="form-group">
                     <label asp-for="Input.Roles" class="form-label"></label>
                     <br />
-                    <div class="multiselect">
-                        <div class="selectBox" onclick="showCheckboxes()">
-                            <select>
-                                <option>Select Roles</option>
-                            </select>
-                            <div class="overSelect"></div>
-                        </div>
-                        <div id="checkboxes">
-                            @foreach (var role in Model.AllRoles)
-                            {
-                                <label for="@role">
-                                    <input type="checkbox" id="@role" />@role
-                                </label>
-                            }
-                        </div>
+                    @* <select multiple class="form-control" asp-items="selectList"
+                    asp-for="SelectedRoles"></select> *@
+                    @*                    @foreach (var role in Model.AllRoleNames)
+                    {
+                    <div>
+                    <input type="checkbox" value="@role" asp-for="Input.Roles[role]" />
+                    <label for="@role">@role</label>
                     </div>
+                    @*true olan dictionary itemleri sumbit sırasında falseye dönüyor
+
+                    }*@
+
+                    <select multiple class="form-control" asp-for="Input.Roles"
+                            asp-items="@(new SelectList(Model.AllRoleNames, Model.Input.Roles))">
+                    </select>
+
+                    @*                    <div class="multiselect">
+                    <div class="selectBox" onclick="showCheckboxes()">
+                    <select>
+                    <option>Select Roles</option>
+                    </select>
+                    <div class="overSelect"></div>
+                    </div>
+                    <div id="checkboxes">
+                    @foreach (var role in Model.AllRoleNames)
+                    {
+                    <label for="@role">
+                    <input type="checkbox" id="@role" />@role
+                    </label>
+                    }
+                    </div>
+                    </div>*@
                 </div>
                 <br />
-                <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
+                <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary" onclick="Submit()">Save</button>
             </form>
         </div>
     </div>
