@@ -1,3 +1,5 @@
+using FaturaTakip.Data;
+using FaturaTakip.Data.Models;
 using FaturaTakip.Data.Models.Abstract;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -17,14 +19,17 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
         private readonly UserManager<InvoiceTrackUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ILogger<UserModel> _logger;
+        private readonly InvoiceTrackContext _context;
         public UserModel(
             UserManager<InvoiceTrackUser> userManager,
             ILogger<UserModel> logger,
-            RoleManager<IdentityRole> roleManager)
+            RoleManager<IdentityRole> roleManager,
+            InvoiceTrackContext context)
         {
             _userManager = userManager;
             _logger = logger;
             _roleManager = roleManager;
+            _context = context;
         }
 
         [BindProperty]
@@ -119,7 +124,7 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
         {
             AllRoleNames = _roleManager.Roles.ToList().Select(x => x.Name).ToList();
 
-            foreach (string roleName in AllRoleNames) 
+            foreach (string roleName in AllRoleNames)
             {
                 _logger.LogCritical(roleName);
             }
@@ -208,6 +213,17 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
                     return false;
 
                 }
+
+                if (rolesToRemove.Contains("tenant"))
+                {
+                    var tenantToDelete = await _context.Tenants.FirstAsync(t => t.Name == user.Name);
+                    _context.Remove(tenantToDelete);
+                }
+                if (rolesToRemove.Contains("landlord"))
+                {
+                    var landLordToDelete = await _context.Landlords.FirstAsync(l => l.Name == user.Name);
+                    _context.Remove(landLordToDelete);
+                }
             }
 
             if (Input.Roles?.Count > 0)
@@ -219,6 +235,17 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
                 {
                     StatusMessage = "Error : Role Add Error.";
                     return false;
+                }
+
+                if (rolesToAdd.Contains("tenant"))
+                {
+                    var tenant = SetUserData<Tenant>(user);
+                    await _context.AddAsync(tenant);
+                }
+                if (rolesToAdd.Contains("landlord"))
+                {
+                    var landLord = SetUserData<Landlord>(user);
+                    await _context.AddAsync(landLord);
                 }
             }
 
@@ -233,10 +260,43 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
                     StatusMessage = "Error : Add Default Unknown Role Error.";
                     return false;
                 }
-            }
 
+                user.Status = false;
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                if(userRoles.Contains("unknown") && userRoles.Count != 1)
+                {
+                    var removeUnknownResult = await _userManager.RemoveFromRoleAsync(user, "unknown");
+                    if (!removeUnknownResult.Succeeded)
+                    {
+                        StatusMessage = "Error : Remove Unknown Role Error.";
+                        return false;
+                    }
+                }
+
+                user.Status = true;
+                await _context.SaveChangesAsync();
+            }
 
             return true;
         }
+
+        private T SetUserData<T>(InvoiceTrackUser user) where T : User
+        {
+            T userToAdd = Activator.CreateInstance(typeof(T)) as T;
+
+            userToAdd.Name = user.Name;
+            userToAdd.LastName = user.LastName;
+            userToAdd.GovermentId = user.GovermentId;
+            userToAdd.Email = user.Email;
+            userToAdd.Phone = user.PhoneNumber;
+            userToAdd.YearOfBirth = user.YearOfBirth;
+
+            return userToAdd;
+        }
     }
+
+
 }

@@ -6,7 +6,7 @@ namespace FaturaTakip.Data.Models
     public class Tenant : User
     {
         [StringLength(9)]
-        public string LisencePlate { get; set; }
+        public string? LisencePlate { get; set; }
 
 
     }

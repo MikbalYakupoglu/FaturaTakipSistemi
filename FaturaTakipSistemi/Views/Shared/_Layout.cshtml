@@ -23,20 +23,24 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
 
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false" style="color: red
+                        @if (User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role && c.Value == "admin").Any())
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false" style="color: red
                                                                                                                             ">Admin Panel</a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" asp-area="" asp-controller="Apartments" asp-action="Index">Apartments </a></li>
-                                <li><a class="dropdown-item" asp-area="" asp-controller="Debts" asp-action="Index">Debts</a></li>
-                                <li><a class="dropdown-item" asp-area="" asp-controller="Landlords" asp-action="Index">Landlords</a></li>
-                                <li><a class="dropdown-item" asp-area="" asp-controller="Messages" asp-action="Index">Messages</a></li>
-                                <li><a class="dropdown-item" asp-area="" asp-controller="Payments" asp-action="Index">Payments</a></li>
-                                <li><a class="dropdown-item" asp-area="" asp-controller="RentedApartments" asp-action="Index">RentedApartments</a></li>
-                                <li><a class="dropdown-item" asp-area="" asp-controller="Tenants" asp-action="Index">Tenants</a></li>
-                                @*<li><a class="dropdown-item" href="">Something else here</a></li>*@
-                            </ul>
-                        </li>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Apartments" asp-action="Index">Apartments </a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Debts" asp-action="Index">Debts</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Landlords" asp-action="Index">Landlords</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Messages" asp-action="Index">Messages</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Payments" asp-action="Index">Payments</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="RentedApartments" asp-action="Index">RentedApartments</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Tenants" asp-action="Index">Tenants</a></li>
+                                    @*<li><a class="dropdown-item" href="">Something else here</a></li>*@
+                                </ul>
+                            </li>
+                        }
+                       
 
                         <li class="nav-item" style="float: right">
                             <a class="nav-link text-dark" asp-area="Identity" asp-controller="Account" asp-action="Login">Login</a>

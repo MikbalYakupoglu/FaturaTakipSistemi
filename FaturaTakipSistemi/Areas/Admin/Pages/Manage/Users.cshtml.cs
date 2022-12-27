@@ -63,72 +63,9 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
 
         }
 
-        public async Task<IActionResult> OnGetAsync()
-        {
-     
+        public IActionResult OnGet()
+        {     
             return Page();
-        }
-
-        public async Task<IActionResult> OnPostAsync()
-        {
-            //var user = await _userManager.GetUserAsync(User);
-            //if (user == null)
-            //{
-            //    return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            //}
-
-            //if (!ModelState.IsValid)
-            //{
-            //    return Page();
-            //}
-
-            //var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
-            //if (Input.Phone != phoneNumber)
-            //{
-            //    var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.Phone);
-            //    if (!setPhoneResult.Succeeded)
-            //    {
-            //        StatusMessage = "Unexpected error when trying to set phone number.";
-            //        return RedirectToPage();
-            //    }
-            //}
-
-            //if (Input.Name != user.Name)
-            //{
-            //    user.Name = Input.Name;
-            //}
-
-            //if (Input.LastName != user.LastName)
-            //{
-            //    user.LastName = Input.LastName;
-            //}
-
-            //if (Input.GovermentId != user.GovermentId)
-            //{
-            //    user.GovermentId = Input.GovermentId;
-            //}
-
-            //if (Input.Phone != user.Phone)
-            //{
-            //    user.Phone = Input.Phone;
-            //}
-
-            //if (Input.Email != user.Email)
-            //{
-            //    user.Email = Input.Email;
-            //}
-            
-            //var userRole = await _userManager.GetRolesAsync(user);
-            //if (Input.Roles != userRole)
-            //{
-            //    var itemsToAdd = Input.Roles.Except(userRole);
-            //    userRole = userRole.Union(itemsToAdd).ToList();
-            //}
-
-            //await _userManager.UpdateAsync(user);
-            //await _userManager.AddToRolesAsync(user, userRole);
-            //StatusMessage = "Your profile has been updated";
-            return RedirectToPage();
         }
     }
 }

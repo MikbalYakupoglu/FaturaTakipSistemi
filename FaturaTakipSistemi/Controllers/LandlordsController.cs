@@ -9,16 +9,22 @@ using FaturaTakip.Data;
 using FaturaTakip.Data.Models;
 using FaturaTakip.Models;
 using FaturaTakip.Utils;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FaturaTakip.Controllers
 {
     public class LandlordsController : Controller
     {
         private readonly InvoiceTrackContext _context;
+        private readonly UserManager<InvoiceTrackUser> _userManager;
 
-        public LandlordsController(InvoiceTrackContext context)
+
+        public LandlordsController(InvoiceTrackContext context,
+            UserManager<InvoiceTrackUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Landlords
@@ -165,6 +171,26 @@ namespace FaturaTakip.Controllers
             
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        [Authorize(Roles = "landlord,admin,moderator")]
+        [Route("Landlords/Manage/Tenants")]
+        public async Task<IActionResult> ListTenants()
+        {
+            var loginedUser = await _userManager.GetUserAsync(HttpContext.User);
+            var landlordId = await (
+                             from u in _context.Users
+                             join l in _context.Landlords
+                             on u.GovermentId equals l.GovermentId
+                             where u.Id == loginedUser.Id
+                             select l.Id
+                             ).FirstOrDefaultAsync(); 
+
+            var tenants = from ra in _context.RentedApartments
+                          where ra.Landlord.Id == landlordId
+                          select ra.Tenant;
+
+            return View(tenants.ToList());
         }
 
         private bool LandlordExists(int id)

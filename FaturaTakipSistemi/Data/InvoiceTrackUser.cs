@@ -18,5 +18,7 @@ public class InvoiceTrackUser : IdentityUser
 
     [Range(1900, 2022)]   public int YearOfBirth { get; set; }
 
+    public bool Status { get; set; }
+
 }
 
