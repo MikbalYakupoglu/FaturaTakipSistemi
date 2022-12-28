@@ -53,8 +53,8 @@ namespace FaturaTakip.Data
 
             var rentedApartments = new RentedApartment[]
             {
-                new RentedApartment { FKTenantId = 1,FKApartmentId = 1,FKLandlordId = 1, Status = true },
-                new RentedApartment { FKTenantId = 2,FKApartmentId = 2,FKLandlordId = 2, Status = true }
+                new RentedApartment { FKTenantId = 1,FKApartmentId = 1, Status = true },
+                new RentedApartment { FKTenantId = 2,FKApartmentId = 2, Status = true }
             };
 
             context.RentedApartments.AddRange(rentedApartments);

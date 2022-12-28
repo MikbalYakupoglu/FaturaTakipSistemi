@@ -23,12 +23,13 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
 
-                        @if (User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role && c.Value == "admin").Any())
+                        @if (User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role && c.Value == "admin" || c.Value == "moderator").Any())
                         {
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false" style="color: red
                                                                                                                             ">Admin Panel</a>
                                 <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" asp-area="admin" asp-controller="manage" asp-action="users">Users</a></li>
                                     <li><a class="dropdown-item" asp-area="" asp-controller="Apartments" asp-action="Index">Apartments </a></li>
                                     <li><a class="dropdown-item" asp-area="" asp-controller="Debts" asp-action="Index">Debts</a></li>
                                     <li><a class="dropdown-item" asp-area="" asp-controller="Landlords" asp-action="Index">Landlords</a></li>
@@ -42,13 +43,14 @@
                         }
                        
 
-                        <li class="nav-item" style="float: right">
+@*                        <li class="nav-item" style="float: right">
                             <a class="nav-link text-dark" asp-area="Identity" asp-controller="Account" asp-action="Login">Login</a>
                         </li>
                         <li class="nav-item" style="float: right">
                             <a class="nav-link text-dark" asp-area="Identity" asp-controller="Account" asp-action="Register">Register</a>
-                        </li>
+                        </li>*@
 
+                       @Html.PartialAsync("_LoginPartial.cshtml").Result
 
                     </ul>
                 </div>

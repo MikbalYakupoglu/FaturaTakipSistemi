@@ -5,6 +5,6 @@ namespace FaturaTakip.Data.Models
 {
     public class Landlord : User
     {
-        List<Apartment> Apartments { get; set; }
+
     }
 }

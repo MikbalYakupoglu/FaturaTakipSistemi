@@ -23,7 +23,7 @@ namespace FaturaTakip.Controllers
         // GET: RentedApartments
         public async Task<IActionResult> Index()
         {
-            var invoiceTrackContext = _context.RentedApartments.Include(r => r.Apartment).Include(r => r.Landlord).Include(r => r.Tenant);
+            var invoiceTrackContext = _context.RentedApartments.Include(r => r.Apartment).Include(r => r.Apartment.Landlord).Include(r => r.Tenant);
             return View(await invoiceTrackContext.ToListAsync());
         }
 
@@ -37,7 +37,7 @@ namespace FaturaTakip.Controllers
 
             var rentedApartment = await _context.RentedApartments
                 .Include(r => r.Apartment)
-                .Include(r => r.Landlord)
+                .Include(r => r.Apartment.Landlord)
                 .Include(r => r.Tenant)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (rentedApartment == null)
@@ -52,7 +52,7 @@ namespace FaturaTakip.Controllers
         public IActionResult Create()
         {
             ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id");
-            ViewData["FKLandlordId"] = new SelectList(_context.Landlords, "Id", "Id");
+            //ViewData["FKLandlordId"] = new SelectList(_context.Landlords, "Id", "Id");
             ViewData["FKTenantId"] = new SelectList(_context.Tenants, "Id", "Id");
             return View();
         }
@@ -71,7 +71,7 @@ namespace FaturaTakip.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id", rentedApartment.FKApartmentId);
-            ViewData["FKLandlordId"] = new SelectList(_context.Landlords, "Id", "Id", rentedApartment.FKLandlordId);
+            //ViewData["FKLandlordId"] = new SelectList(_context.Landlords, "Id", "Id", rentedApartment.Apartment.FKLandlordId);
             ViewData["FKTenantId"] = new SelectList(_context.Tenants, "Id", "Id", rentedApartment.FKTenantId);
             return View(rentedApartment);
         }
@@ -90,7 +90,7 @@ namespace FaturaTakip.Controllers
                 return NotFound();
             }
             ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id", rentedApartment.FKApartmentId);
-            ViewData["FKLandlordId"] = new SelectList(_context.Landlords, "Id", "Id", rentedApartment.FKLandlordId);
+            //ViewData["FKLandlordId"] = new SelectList(_context.Landlords, "Id", "Id", rentedApartment.Apartment.FKLandlordId);
             ViewData["FKTenantId"] = new SelectList(_context.Tenants, "Id", "Id", rentedApartment.FKTenantId);
             return View(rentedApartment);
         }
@@ -128,7 +128,7 @@ namespace FaturaTakip.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id", rentedApartment.FKApartmentId);
-            ViewData["FKLandlordId"] = new SelectList(_context.Landlords, "Id", "Id", rentedApartment.FKLandlordId);
+            ViewData["FKLandlordId"] = new SelectList(_context.Landlords, "Id", "Id", rentedApartment.Apartment.FKLandlordId);
             ViewData["FKTenantId"] = new SelectList(_context.Tenants, "Id", "Id", rentedApartment.FKTenantId);
             return View(rentedApartment);
         }
@@ -143,7 +143,7 @@ namespace FaturaTakip.Controllers
 
             var rentedApartment = await _context.RentedApartments
                 .Include(r => r.Apartment)
-                .Include(r => r.Landlord)
+                .Include(r => r.Apartment.Landlord)
                 .Include(r => r.Tenant)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (rentedApartment == null)

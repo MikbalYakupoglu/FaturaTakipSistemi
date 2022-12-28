@@ -33,6 +33,10 @@
                 <select asp-for="Block" class="form-control" asp-items="ViewBag.Blocks"></select>
             </div>
             <div class="form-group">
+                <label asp-for="FKLandlordId" class="control-label"></label>
+                <select asp-for="FKLandlordId" class="form-control" asp-items="ViewBag.Landlords"></select>
+            </div>
+            <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
         </form>

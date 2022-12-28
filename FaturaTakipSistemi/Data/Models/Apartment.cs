@@ -1,6 +1,8 @@
 ﻿
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FaturaTakip.Data.Models
 {
@@ -32,5 +34,12 @@ namespace FaturaTakip.Data.Models
         public int DoorNumber { get; set; }
         public Type Type { get; set; }
         public Block Block { get; set; }
+
+        public int FKLandlordId { get; set; }
+
+        [ValidateNever]
+        [ForeignKey(nameof(FKLandlordId))]
+        public Landlord Landlord { get; set; }
+
     }
 }

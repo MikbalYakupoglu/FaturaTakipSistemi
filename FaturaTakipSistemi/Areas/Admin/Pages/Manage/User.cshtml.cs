@@ -182,7 +182,17 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
             }
 
             await _userManager.UpdateAsync(user);
-            StatusMessage = "Your profile has been updated";
+
+            if(!string.IsNullOrEmpty(StatusMessage))
+            {
+                if (!StatusMessage.StartsWith("Warning"))
+                    StatusMessage = "Your profile has been updated";
+            }
+            else
+                StatusMessage = "Your profile has been updated";
+
+
+
             return RedirectToPage();
         }
 
@@ -205,32 +215,44 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
 
             if (rolesToRemove.Count > 0)
             {
-                var deleteResult = await _userManager.RemoveFromRolesAsync(user, rolesToRemove);
+                if (rolesToRemove.Contains("tenant"))
+                {
+                    var tenantToDelete = await _context.Tenants.FirstAsync(t => t.GovermentId == user.GovermentId);
+                    if (_context.RentedApartments.Any(ra => ra.Tenant.Id == tenantToDelete.Id))
+                    {
+                        StatusMessage = "Warning : Cannot be deleted while the tenant is actively in the apartment.";
+                        rolesToRemove.Remove("tenant");
+                    }
+                    else
+                        _context.Remove(tenantToDelete);
+                }
 
+                if (rolesToRemove.Contains("landlord"))
+                {
+                    var landLordToDelete = await _context.Landlords.FirstAsync(l => l.GovermentId == user.GovermentId);
+                    if(_context.Apartments.Any(a=> a.Landlord.Id == landLordToDelete.Id))
+                    {
+                        StatusMessage = "Warning : You can't delete a host while the owner's home is found.";
+                        rolesToRemove.Remove("landlord");
+                    }
+                    else
+                        _context.Remove(landLordToDelete);
+                }
+
+                var deleteResult = await _userManager.RemoveFromRolesAsync(user, rolesToRemove);
                 if (!deleteResult.Succeeded)
                 {
                     StatusMessage = "Error : Role Delete Error.";
                     return false;
 
                 }
-
-                if (rolesToRemove.Contains("tenant"))
-                {
-                    var tenantToDelete = await _context.Tenants.FirstAsync(t => t.Name == user.Name);
-                    _context.Remove(tenantToDelete);
-                }
-                if (rolesToRemove.Contains("landlord"))
-                {
-                    var landLordToDelete = await _context.Landlords.FirstAsync(l => l.Name == user.Name);
-                    _context.Remove(landLordToDelete);
-                }
             }
 
             if (Input.Roles?.Count > 0)
             {
                 var rolesToAdd = Input.Roles.Except(userRoles, StringComparer.Ordinal).ToList();
-
                 var addResult = await _userManager.AddToRolesAsync(user, rolesToAdd);
+
                 if (!addResult.Succeeded)
                 {
                     StatusMessage = "Error : Role Add Error.";

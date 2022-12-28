@@ -6,6 +6,8 @@ using Type = FaturaTakip.Data.Models.Type;
 using FaturaTakip.Utils;
 using FaturaTakip.Data.Models;
 using FaturaTakip.Models;
+using System.Linq;
+using System.Diagnostics;
 
 namespace FaturaTakip.Controllers
 {
@@ -15,7 +17,7 @@ namespace FaturaTakip.Controllers
 
         public ApartmentsController(InvoiceTrackContext context)
         {
-            _context = context;
+            _context = context;  
         }
 
         // GET: Apartments
@@ -54,16 +56,30 @@ namespace FaturaTakip.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Floor,DoorNumber,Type,Block")] Apartment apartment)
+        public async Task<IActionResult> Create([Bind("Id,Floor,DoorNumber,Type,Block,FKLandlordId")] Apartment apartment)
         {
-            if (ModelState.IsValid)
+            SetBlockAndTypeData();
+            var landlord = apartment.FKLandlordId;
+
+
+            var isExist = await _context.Apartments.AnyAsync(a => a.Block == apartment.Block && a.Floor == apartment.Floor && a.DoorNumber == apartment.DoorNumber);
+
+            if (isExist)
+            {
+                ViewData["Hata"] = "Apartman Zaten Bulunuyor.";
+                return View(apartment);
+            }
+
+            if (ModelState.IsValid && apartment.Type != Type.None)
             {
                 _context.Add(apartment);
                  await _context.SaveChangesAsync();
                  return RedirectToAction(nameof(Index));
             }
+            else
+                ViewData["Hata"] = "Apartman Bilgileri Boş Bırakılamaz.";
 
-            SetBlockAndTypeData();
+
             return View(apartment);
         }
 
@@ -91,6 +107,8 @@ namespace FaturaTakip.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Floor,DoorNumber,Type,Block")] Apartment apartment)
         {
+            SetBlockAndTypeData();
+
             if (id != apartment.Id)
             {
                 return NotFound();
@@ -116,7 +134,9 @@ namespace FaturaTakip.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            SetBlockAndTypeData();
+            else
+                ViewData["Hata"] = "Apartman Bilgileri Boş Bırakılamaz.";
+
             return View(apartment);
         }
 
@@ -187,6 +207,17 @@ namespace FaturaTakip.Controllers
 
             //ViewData["Types"] = new SelectList(typeList);
             ViewData["Blocks"] = new SelectList(blockList);
+
+
+            var landlords = _context.Landlords.ToListAsync().Result;
+            Dictionary<int, string> landlordInfo = new Dictionary<int, string>();
+
+            foreach (var landlord in landlords)
+            {
+                landlordInfo.Add(landlord.Id,String.Join("",landlord.GovermentId, " - ", landlord.Name, " ", landlord.LastName));
+            }
+
+            ViewData["Landlords"] = new SelectList(landlordInfo.OrderBy(x=> x.Key), "Key", "Value");
         }
     }
 }

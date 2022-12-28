@@ -187,7 +187,7 @@ namespace FaturaTakip.Controllers
                              ).FirstOrDefaultAsync(); 
 
             var tenants = from ra in _context.RentedApartments
-                          where ra.Landlord.Id == landlordId
+                          where ra.Apartment.Landlord.Id == landlordId
                           select ra.Tenant;
 
             return View(tenants.ToList());
