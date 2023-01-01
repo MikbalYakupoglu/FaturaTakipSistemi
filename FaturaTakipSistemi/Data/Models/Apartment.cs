@@ -34,6 +34,8 @@ namespace FaturaTakip.Data.Models
         public int DoorNumber { get; set; }
         public Type Type { get; set; }
         public Block Block { get; set; }
+        public int RentPrice { get; set; }
+        public bool Rented { get; set; }
 
         public int FKLandlordId { get; set; }
 

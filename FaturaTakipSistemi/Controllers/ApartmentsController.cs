@@ -190,7 +190,7 @@ namespace FaturaTakip.Controllers
                                     ID = e.ToString(),
                                     Name = EnumExtensions.GetDescriptionOfEnum((Type)e)
                                 };
-            ViewBag.Types = new SelectList(enumDataTypes, "ID", "Name");
+            ViewData["Types"] = new SelectList(enumDataTypes, "ID", "Name");
 
             //List<Type> typeList = new List<Type>();
             //foreach (var type in (Type[])Enum.GetValues(typeof(Type)))

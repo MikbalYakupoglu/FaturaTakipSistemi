@@ -6,6 +6,11 @@ namespace FaturaTakip.Data.Models
 {
     public class RentedApartment
     {
+        public RentedApartment()
+        {
+            RentTime = DateTime.Now;
+        }
+
         public int Id { get; set; }
         public bool Status { get; set; }
         public int FKTenantId { get; set; }
@@ -20,5 +25,6 @@ namespace FaturaTakip.Data.Models
         public Apartment Apartment { get; set; }
 
 
+        public DateTime RentTime { get; set; }  
     }
 }

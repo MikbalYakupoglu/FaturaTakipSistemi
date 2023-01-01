@@ -66,6 +66,7 @@ namespace FaturaTakip.Controllers
         {
             if (ModelState.IsValid)
             {
+                rentedApartment.RentTime = DateTime.Now;
                 _context.Add(rentedApartment);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
