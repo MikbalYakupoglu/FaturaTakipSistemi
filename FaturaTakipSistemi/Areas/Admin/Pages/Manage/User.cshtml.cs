@@ -11,9 +11,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FaturaTakip.Areas.Admin.Pages.Manage
 {
+[Authorize(Roles = "admin,moderator")]
     public class UserModel : PageModel
     {
         private readonly UserManager<InvoiceTrackUser> _userManager;

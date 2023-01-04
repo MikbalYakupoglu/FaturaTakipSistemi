@@ -5,7 +5,9 @@ using FaturaTakip.Resources;
 using FaturaTakip.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,6 +51,18 @@ builder.Services.AddMvc()
     };
 });
 
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    var supportedCultures = new[]
+    {
+        new CultureInfo("en"),
+        new CultureInfo("tr")
+    };
+    options.DefaultRequestCulture = new RequestCulture("en");
+    options.SupportedCultures = supportedCultures;
+    options.SupportedUICultures = supportedCultures;
+});
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -67,22 +81,25 @@ else
     app.UseHsts();
 }
 
-var cultures = new List<CultureInfo> {
-    new ("en"),
-    new ("tr")
-};
+//var cultures = new List<CultureInfo> {
+//    new ("en"),
+//    new ("tr")
+//};
 
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-app.UseRequestLocalization(options => {
-    options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("en");
-    options.SupportedCultures = cultures;
-    options.SupportedUICultures = cultures;
-});
+//app.UseRequestLocalization(options => {
+//    options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("en");
+//    options.SupportedCultures = cultures;
+//    options.SupportedUICultures = cultures;
+//});
 
 app.UseRouting();
+
+var localizationOptions = app.Services.GetService<IOptions<RequestLocalizationOptions>>().Value;
+app.UseRequestLocalization(localizationOptions);
 
 app.MapControllerRoute(
     name: "MyArea",
