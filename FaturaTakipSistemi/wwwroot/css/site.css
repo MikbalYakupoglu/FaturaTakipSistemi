@@ -20,3 +20,12 @@ body {
 .right-aligned {
     float: right;
 }
+
+.field-validation-error {
+    color: #dc3545;
+}
+
+.input-validation-error {
+    border-color: #dc3545;
+    background-color: #ffe6e6;
+}

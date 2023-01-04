@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -12,16 +14,13 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">@localizer["Home"]</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
 
                         @if (User.Claims.Any(c => c.Type == System.Security.Claims.ClaimTypes.Role && c.Value == "admin" || c.Value == "moderator"))
                         {
@@ -29,14 +28,14 @@
                                 <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false" style="color: red
                                                                                                                             ">Admin Panel</a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" asp-area="admin" asp-controller="manage" asp-action="users">Users</a></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Apartments" asp-action="Index">Apartments </a></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Debts" asp-action="Index">Debts</a></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Landlords" asp-action="Index">Landlords</a></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Messages" asp-action="Index">Messages</a></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Payments" asp-action="Index">Payments</a></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="RentedApartments" asp-action="Index">RentedApartments</a></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Tenants" asp-action="Index">Tenants</a></li>
+                                    <li><a class="dropdown-item" asp-area="admin" asp-controller="manage" asp-action="users">@localizer["Users"]</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Apartments" asp-action="Index">@localizer["Apartments"]</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Debts" asp-action="Index">@localizer["Debts"]</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Landlords" asp-action="Index">@localizer["Landlords"]</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Messages" asp-action="Index">@localizer["Messages"]</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Payments" asp-action="Index">@localizer["Payments"]</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="RentedApartments" asp-action="Index">@localizer["RentedApartments"]</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Tenants" asp-action="Index">@localizer["Tenants"]</a></li>
                                     @*<li><a class="dropdown-item" href="">Something else here</a></li>*@
                                 </ul>
                             </li>
@@ -47,14 +46,14 @@
                         {
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false" style="color: red
-                                                                                                                                ">Manage</a>
+                                                                                                                                ">@localizer["Manage"]</a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Landlords" asp-action="ListApartments">Apartments </a></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Landlords" asp-action="ListTenants">Debts</a></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Landlords" asp-action="ListTenants">Messages</a></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Landlords" asp-action="ListTenants">Payments</a></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Landlords" asp-action="ListTenants">RentedApartments</a></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Landlords" asp-action="ListTenants">Tenants</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Landlords" asp-action="ListApartments">@localizer["Apartments"] </a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Landlords" asp-action="ListTenants">@localizer["Debts"]</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Landlords" asp-action="ListTenants">@localizer["Messages"]</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Landlords" asp-action="ListTenants">@localizer["Payments"]</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Landlords" asp-action="ListTenants">@localizer["RentedApartments"]</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Landlords" asp-action="ListTenants">@localizer["Tenants"]</a></li>
                                     @*<li><a class="dropdown-item" href="">Something else here</a></li>*@
                                 </ul>
                             </li>

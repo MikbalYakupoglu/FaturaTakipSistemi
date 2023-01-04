@@ -1,4 +1,8 @@
+using System.Globalization;
+using System.Reflection;
 using FaturaTakip.Data;
+using FaturaTakip.Resources;
+using FaturaTakip.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +10,8 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddSingleton<CommonLocalizationService>();
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<InvoiceTrackContext>(options =>
     options.UseSqlServer(connectionString));
@@ -27,6 +33,22 @@ builder.Services.AddDefaultIdentity<InvoiceTrackUser>(options =>
 
 
 // Globalization : https://learn.microsoft.com/en-us/aspnet/core/fundamentals/localization?view=aspnetcore-6.0
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+//builder.Services.AddMvc()
+//    .AddViewLocalization(Microsoft.AspNetCore.Mvc.Razor.LanguageViewLocationExpanderFormat.Suffix)
+//    .AddDataAnnotationsLocalization();
+
+builder.Services.AddMvc()
+    .AddViewLocalization()
+    .AddDataAnnotationsLocalization(options =>
+{
+    options.DataAnnotationLocalizerProvider = (type, factory) =>
+    {
+        var assemblyName = new AssemblyName(typeof(CommonResources).GetTypeInfo().Assembly.FullName);
+        return factory.Create(nameof(CommonResources), assemblyName.Name);
+    };
+});
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -45,8 +67,20 @@ else
     app.UseHsts();
 }
 
+var cultures = new List<CultureInfo> {
+    new ("en"),
+    new ("tr")
+};
+
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+app.UseRequestLocalization(options => {
+    options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("en");
+    options.SupportedCultures = cultures;
+    options.SupportedUICultures = cultures;
+});
 
 app.UseRouting();
 
