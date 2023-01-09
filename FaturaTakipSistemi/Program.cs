@@ -1,6 +1,8 @@
 using System.Globalization;
 using System.Reflection;
 using FaturaTakip.Data;
+using FaturaTakip.DataAccess.Abstract;
+using FaturaTakip.DataAccess.Concrete.EntityFramework;
 using FaturaTakip.Resources;
 using FaturaTakip.Services;
 using Microsoft.AspNetCore.Builder;
@@ -12,7 +14,19 @@ using Microsoft.Extensions.Options;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+#region DependencyResolvers
 builder.Services.AddSingleton<CommonLocalizationService>();
+builder.Services.AddSingleton<IApartmentDal, EfApartmentDal>();
+builder.Services.AddSingleton<IDebtDal, EfDebtDal>();
+builder.Services.AddSingleton<ILandlordDal, EfLandlordDal>();
+builder.Services.AddSingleton<IMessageDal, EfMessageDal>();
+builder.Services.AddSingleton<IPaymentDal, EfPaymentDal>();
+builder.Services.AddSingleton<IRentedApartmentDal, EfRentedApartmentDal>();
+builder.Services.AddSingleton<ITenantDal, EfTenantDal>();
+
+
+#endregion
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<InvoiceTrackContext>(options =>
