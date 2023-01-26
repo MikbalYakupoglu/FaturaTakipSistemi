@@ -4,10 +4,10 @@ namespace FaturaTakip.Core.DataAccess;
 
 public interface IEntityRepository<T> where T : class, IEntity, new()
 {
-    Task<T> Add(T entity);
-    Task<T> Delete(T entity);
-    Task<T> Update(T entity);
-    Task<T> Get(Expression<Func<T,bool>> filter);
-    Task<List<T>> GetAll(Expression<Func<T, bool>> filter = null);
+    Task<T> AddAsync(T entity);
+    Task<T> DeleteAsync(T entity);
+    Task<T> UpdateAsync(T entity);
+    Task<T> GetAsync(Expression<Func<T,bool>> filter);
+    Task<List<T>> GetAllAsync(Expression<Func<T, bool>> filter = null);
 
 }

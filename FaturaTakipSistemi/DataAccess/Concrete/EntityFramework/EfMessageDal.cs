@@ -5,7 +5,9 @@ using FaturaTakip.DataAccess.Abstract;
 
 namespace FaturaTakip.DataAccess.Concrete.EntityFramework;
 
-public class EfMessageDal : EfEntityRepositoryBase<Message, InvoiceTrackContext>, IMessageDal
+public class EfMessageDal : EfEntityRepositoryBase<Message>, IMessageDal
 {
-
+    public EfMessageDal(InvoiceTrackContext context) : base(context)
+    {
+    }
 }

@@ -8,40 +8,42 @@ using FaturaTakip.Data.Models;
 using FaturaTakip.Models;
 using System.Linq;
 using System.Diagnostics;
+using FaturaTakip.Business.Abstract;
 
 namespace FaturaTakip.Controllers
 {
     public class ApartmentsController : Controller
     {
+        private readonly IApartmentService _apartmentService;
         private readonly InvoiceTrackContext _context;
 
-        public ApartmentsController(InvoiceTrackContext context)
+        public ApartmentsController(IApartmentService apartmentService, InvoiceTrackContext context)
         {
-            _context = context;  
+            _apartmentService = apartmentService;
+            _context = context;
         }
 
         // GET: Apartments
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Apartments.ToListAsync());
+            return View(_apartmentService.GetAllAsync().Result.Data); // Result.Data
         }
 
         // GET: Apartments/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Apartments == null)
+            if (id == null || !_apartmentService.GetAllAsync().Result.IsSuccess)
             {
                 return NotFound();
             }
 
-            var apartment = await _context.Apartments
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (apartment == null)
+            var apartment = await _apartmentService.GetByIdAsync(id);
+            if (apartment.Data == null)
             {
                 return NotFound();
             }
 
-            return View(apartment);
+            return View(apartment.Data);
         }
 
         // GET: Apartments/Create
@@ -62,18 +64,14 @@ namespace FaturaTakip.Controllers
             var landlord = apartment.FKLandlordId;
 
 
-            var isExist = await _context.Apartments.AnyAsync(a => a.Block == apartment.Block && a.Floor == apartment.Floor && a.DoorNumber == apartment.DoorNumber);
-
-            if (isExist)
-            {
-                ViewData["Hata"] = "Apartman Zaten Bulunuyor.";
-                return View(apartment);
-            }
-
             if (ModelState.IsValid && apartment.Type != Type.None)
             {
-                _context.Add(apartment);
-                 await _context.SaveChangesAsync();
+                 var result = await _apartmentService.AddAsync(apartment);
+                 if (!result.IsSuccess)
+                 {
+                     ViewData["Hata"] = result.Message;
+                     return View(apartment);
+                 }
                  return RedirectToAction(nameof(Index));
             }
             else
@@ -86,18 +84,18 @@ namespace FaturaTakip.Controllers
         // GET: Apartments/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Apartments == null)
+            if (id == null || !_apartmentService.GetAllAsync().Result.IsSuccess)
             {
                 return NotFound();
             }
 
-            var apartment = await _context.Apartments.FindAsync(id);
-            if (apartment == null)
+            var apartment = await _apartmentService.GetByIdAsync(id);
+            if (apartment.Data == null)
             {
                 return NotFound();
             }
             SetBlockAndTypeData();
-            return View(apartment);
+            return View(apartment.Data);
         }
 
         // POST: Apartments/Edit/5
@@ -118,8 +116,14 @@ namespace FaturaTakip.Controllers
             {
                 try
                 {
-                    _context.Update(apartment);
-                    await _context.SaveChangesAsync();
+                    var result = await _apartmentService.UpdateAsync(apartment);
+                    if (!result.IsSuccess)
+                    {
+                        ViewData["Hata"] = result.Message;
+                        return View(result.Data);
+
+                    }
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -143,19 +147,18 @@ namespace FaturaTakip.Controllers
         // GET: Apartments/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Apartments == null)
+            if (id == null || !_apartmentService.GetAllAsync().Result.IsSuccess)
             {
                 return NotFound();
             }
 
-            var apartment = await _context.Apartments
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (apartment == null)
+            var apartment = await _apartmentService.GetByIdAsync(id);
+            if (apartment.Data == null)
             {
                 return NotFound();
             }
 
-            return View(apartment);
+            return View(apartment.Data);
         }
 
         // POST: Apartments/Delete/5
@@ -163,23 +166,31 @@ namespace FaturaTakip.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Apartments == null)
+            if (!_apartmentService.GetAllAsync().Result.IsSuccess)
             {
                 return Problem("Entity set 'InvoiceTrackContext.Apartments'  is null.");
             }
-            var apartment = await _context.Apartments.FindAsync(id);
-            if (apartment != null)
+
+            var apartment = await _apartmentService.GetByIdAsync(id);
+            if (apartment.Data != null)
             {
-                _context.Apartments.Remove(apartment);
+                var result = await _apartmentService.DeleteAsync(apartment.Data);
+                if (!result.IsSuccess)
+                {
+                    ViewData["Hata"] = result.Message;
+                    return View(apartment.Data);
+                }
             }
-            
-            await _context.SaveChangesAsync();
+            else
+            {
+                return NotFound();
+            }
             return RedirectToAction(nameof(Index));
         }
 
         private bool ApartmentExists(int id)
         {
-          return _context.Apartments.Any(e => e.Id == id);
+            return _apartmentService.GetByIdAsync(id).Result.IsSuccess;
         }
 
         private void SetBlockAndTypeData()
