@@ -1,9 +1,8 @@
-﻿using FaturaTakip.Core.DataAccess;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FaturaTakip.Data.Models
 {
-    public class Payment : IEntity
+    public class Payment
     {
         public int Id { get; set; }
         public int Amount { get; set; }

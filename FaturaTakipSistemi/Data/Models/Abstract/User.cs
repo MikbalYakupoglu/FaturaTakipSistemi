@@ -1,9 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using FaturaTakip.Core.DataAccess;
 
 namespace FaturaTakip.Data.Models.Abstract;
 
-public abstract class User : IEntity
+public abstract class User
 {
     public int Id { get; set; }
     [StringLength(50)]

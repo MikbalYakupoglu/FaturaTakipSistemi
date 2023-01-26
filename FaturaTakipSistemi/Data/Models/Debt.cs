@@ -1,9 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using FaturaTakip.Core.DataAccess;
 
 namespace FaturaTakip.Data.Models
 {
-    public class Debt : IEntity
+    public class Debt
     {
         public int Id { get; set; }
         public int Dues { get; set; }

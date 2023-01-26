@@ -1,11 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using FaturaTakip.Core.DataAccess;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace FaturaTakip.Data.Models
 {
-    public class RentedApartment : IEntity
+    public class RentedApartment
     {
         public RentedApartment()
         {

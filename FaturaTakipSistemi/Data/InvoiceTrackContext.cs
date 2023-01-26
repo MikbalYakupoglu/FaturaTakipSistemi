@@ -7,8 +7,6 @@ namespace FaturaTakip.Data
 {
     public class InvoiceTrackContext : IdentityDbContext<InvoiceTrackUser>
     {
-        public InvoiceTrackContext() { }
-
         public InvoiceTrackContext(DbContextOptions<InvoiceTrackContext> options) : base(options)
         {
             
