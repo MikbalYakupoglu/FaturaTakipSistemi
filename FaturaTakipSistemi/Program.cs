@@ -1,7 +1,5 @@
 using System.Globalization;
 using System.Reflection;
-using FaturaTakip.Business.Abstract;
-using FaturaTakip.Business.Concrete;
 using FaturaTakip.Data;
 using FaturaTakip.DataAccess.Abstract;
 using FaturaTakip.DataAccess.Concrete.EntityFramework;
@@ -19,16 +17,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 #region DependencyResolvers
 builder.Services.AddSingleton<CommonLocalizationService>();
-
-builder.Services.AddScoped<IApartmentDal, EfApartmentDal>();
-builder.Services.AddScoped<IDebtDal, EfDebtDal>();
-builder.Services.AddScoped<ILandlordDal, EfLandlordDal>();
-builder.Services.AddScoped<IMessageDal, EfMessageDal>();
-builder.Services.AddScoped<IPaymentDal, EfPaymentDal>();
-builder.Services.AddScoped<IRentedApartmentDal, EfRentedApartmentDal>();
-builder.Services.AddScoped<ITenantDal, EfTenantDal>();
-
-builder.Services.AddScoped<IApartmentService, ApartmentManager>();
+builder.Services.AddSingleton<IApartmentDal, EfApartmentDal>();
+builder.Services.AddSingleton<IDebtDal, EfDebtDal>();
+builder.Services.AddSingleton<ILandlordDal, EfLandlordDal>();
+builder.Services.AddSingleton<IMessageDal, EfMessageDal>();
+builder.Services.AddSingleton<IPaymentDal, EfPaymentDal>();
+builder.Services.AddSingleton<IRentedApartmentDal, EfRentedApartmentDal>();
+builder.Services.AddSingleton<ITenantDal, EfTenantDal>();
 
 
 #endregion

@@ -5,9 +5,7 @@ using FaturaTakip.DataAccess.Abstract;
 
 namespace FaturaTakip.DataAccess.Concrete.EntityFramework;
 
-public class EfLandlordDal : EfEntityRepositoryBase<Landlord>, ILandlordDal
+public class EfLandlordDal : EfEntityRepositoryBase<Landlord, InvoiceTrackContext>, ILandlordDal
 {
-    public EfLandlordDal(InvoiceTrackContext context) : base(context)
-    {
-    }
+
 }
