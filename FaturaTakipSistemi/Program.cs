@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,9 +37,6 @@ builder.Services.AddDefaultIdentity<InvoiceTrackUser>(options =>
 
 // Globalization : https://learn.microsoft.com/en-us/aspnet/core/fundamentals/localization?view=aspnetcore-6.0
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
-//builder.Services.AddMvc()
-//    .AddViewLocalization(Microsoft.AspNetCore.Mvc.Razor.LanguageViewLocationExpanderFormat.Suffix)
-//    .AddDataAnnotationsLocalization();
 
 builder.Services.AddMvc()
     .AddViewLocalization()
@@ -61,6 +59,13 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.DefaultRequestCulture = new RequestCulture("en");
     options.SupportedCultures = supportedCultures;
     options.SupportedUICultures = supportedCultures;
+
+    options.RequestCultureProviders = new List<IRequestCultureProvider>
+    {
+        new CookieRequestCultureProvider(),
+        new QueryStringRequestCultureProvider()
+    };
+
 });
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -81,20 +86,11 @@ else
     app.UseHsts();
 }
 
-//var cultures = new List<CultureInfo> {
-//    new ("en"),
-//    new ("tr")
-//};
 
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-//app.UseRequestLocalization(options => {
-//    options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("en");
-//    options.SupportedCultures = cultures;
-//    options.SupportedUICultures = cultures;
-//});
 
 app.UseRouting();
 

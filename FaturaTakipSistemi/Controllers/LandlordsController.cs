@@ -283,6 +283,22 @@ namespace FaturaTakip.Controllers
             return RedirectToAction("ListTenants");
         }
 
+        // GET: Landlords/Manage/Tenants/Delete/5
+        [Authorize(Roles = "landlord,admin,moderator")]
+        [Route("Landlords/Manage/Tenants/Delete/{tenantId}")]
+        public async Task<IActionResult> DeleteTenant(int? tenantId)
+        {
+            if (tenantId == null || _context.Tenants == null)            
+                return NotFound();
+            
+            var tenant = await _context.Tenants.FirstOrDefaultAsync(t=> t.Id == tenantId);
+
+            if(tenant == null)
+                return NotFound();
+
+            return View(tenant);
+        }
+
         #endregion
 
         #endregion

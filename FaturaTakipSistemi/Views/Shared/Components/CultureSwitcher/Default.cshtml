@@ -15,7 +15,19 @@
  
  
 <script>
-    document.getElementById("culture-options").addEventListener("change", () => {
-        document.getElementById("culture-switcher").submit();
-    });
+    var e = document.getElementById("culture-options");
+    function onChange() {
+
+        var value = e.value;
+        document.getElementById("culture-switcher").submit()
+
+        var name = ".AspNetCore.Culture";
+
+        var date = new Date();
+        date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
+
+        document.cookie = name + "=" + ("c="+value+"|uic="+value)  + expires + "; path=/"; // cookie design -- name => .AspNetCore.Culture" || value =>  c=tr|uic=tr 
+    }
+    e.onchange = onChange;
 </script>
