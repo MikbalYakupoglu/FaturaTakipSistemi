@@ -1,0 +1,73 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using FaturaTakip.Utils
+@using Microsoft.CodeAnalysis.VisualBasic.Syntax
+@model IEnumerable<FaturaTakip.Data.Models.Message>
+
+@{
+    ViewData["Title"] = "Messages";
+}
+
+<h1>Index</h1>
+
+@*<ul>
+    @foreach (var item in ViewData["Types"] as List<string>)
+    {
+        <li>@item</li>
+    }
+</ul>*@
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Apartment.Block)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Apartment.DoorNumber)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Tenant.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Tenant.LastName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Body)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            var shortBody = item.Body.Substring(0,40);
+
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Apartment.Block)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Apartment.DoorNumber)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Tenant.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Tenant.LastName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Title)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => shortBody)...
+                </td>
+                <td>
+                    <a asp-controller="Messages" asp-action="View" asp-route-id="@item.Id">View</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

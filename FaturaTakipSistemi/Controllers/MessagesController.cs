@@ -26,6 +26,25 @@ namespace FaturaTakip.Controllers
             var invoiceTrackContext = _context.Messages.Include(m => m.Landlord).Include(m => m.Tenant);
             return View(await invoiceTrackContext.ToListAsync());
         }
+        public async Task<IActionResult> View(int? id)
+        {
+            if (id == null || _context.Messages == null)
+            {
+                return NotFound();
+            }
+
+            var message = await _context.Messages
+                .Include(m => m.Apartment)
+                .Include(m => m.Tenant)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (message == null)
+            {
+                return NotFound();
+            }
+
+            return View(message);
+        }
+
 
         // GET: Messages/Details/5
         public async Task<IActionResult> Details(int? id)

@@ -4,6 +4,7 @@ using FaturaTakip.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FaturaTakip.Migrations
 {
     [DbContext(typeof(InvoiceTrackContext))]
-    partial class InvoiceTrackContextModelSnapshot : ModelSnapshot
+    [Migration("20230224144237_block-doornumberAddedToMessage")]
+    partial class blockdoornumberAddedToMessage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -131,17 +133,20 @@ namespace FaturaTakip.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<int>("Block")
+                        .HasColumnType("int");
+
                     b.Property<string>("Body")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("FKApartmentId")
+                    b.Property<int>("DoorNumber")
                         .HasColumnType("int");
 
-                    b.Property<int?>("FKLandlordId")
+                    b.Property<int>("FKLandlordId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("FKTenantId")
+                    b.Property<int>("FKTenantId")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
@@ -149,8 +154,6 @@ namespace FaturaTakip.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("FKApartmentId");
 
                     b.HasIndex("FKLandlordId");
 
@@ -468,19 +471,17 @@ namespace FaturaTakip.Migrations
 
             modelBuilder.Entity("FaturaTakip.Data.Models.Message", b =>
                 {
-                    b.HasOne("FaturaTakip.Data.Models.Apartment", "Apartment")
-                        .WithMany()
-                        .HasForeignKey("FKApartmentId");
-
                     b.HasOne("FaturaTakip.Data.Models.Landlord", "Landlord")
                         .WithMany()
-                        .HasForeignKey("FKLandlordId");
+                        .HasForeignKey("FKLandlordId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("FaturaTakip.Data.Models.Tenant", "Tenant")
                         .WithMany()
-                        .HasForeignKey("FKTenantId");
-
-                    b.Navigation("Apartment");
+                        .HasForeignKey("FKTenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Landlord");
 

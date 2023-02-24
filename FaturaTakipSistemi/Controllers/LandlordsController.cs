@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using FaturaTakip.Data;
+using FaturaTakip.Data.Models;
+using FaturaTakip.Utils;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using FaturaTakip.Data;
-using FaturaTakip.Data.Models;
-using FaturaTakip.Models;
-using FaturaTakip.Utils;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Authorization;
-using System.Data;
 using System.Collections;
+using System.Data;
 
 namespace FaturaTakip.Controllers
 {
@@ -184,7 +179,7 @@ namespace FaturaTakip.Controllers
         #region Apartment
 
         [Authorize(Roles = "landlord,admin,moderator")]
-        [Route("Landlords/Manage/Apartments")]
+        [Route("landlords/manage/apartments")]
         public async Task<IActionResult> ListApartments()
         {
             var landlordId = GetLoginedLandlordId();
@@ -192,19 +187,41 @@ namespace FaturaTakip.Controllers
 
             var landlordsApartments = await _context.Apartments.Where(a => a.Landlord.Id == landlordId)
                 .Include(a => a.Landlord)
-                .ToListAsync();
+                .ToListAsync(); 
 
             ViewData["Apartments"] = landlordsApartments;
-
+            
             return View(landlordsApartments);
         }
+
+        #endregion
+
+        #region Message
+
+        [Authorize(Roles = "landlord,admin,moderator")]
+        [Route("landlords/manage/messages")]
+        public async Task<IActionResult> ListMessages()
+        {
+            var landlordId = GetLoginedLandlordId();
+
+            var landlordMessages = await _context.Messages.Where(m => m.Landlord.Id == landlordId)
+                .Include(m => m.Tenant)
+                .Include(m=> m.Apartment)
+                .ToListAsync();
+
+            ViewData["Messages"] = landlordMessages;
+
+            return View(landlordMessages);
+        }
+
+
 
         #endregion
 
         #region Tenant
 
         [Authorize(Roles = "landlord,admin,moderator")]
-        [Route("Landlords/Manage/Tenants")]
+        [Route("landlords/manage/tenants")]
         public async Task<IActionResult> ListTenants()
         {
             var landlordId = GetLoginedLandlordId();
@@ -222,7 +239,7 @@ namespace FaturaTakip.Controllers
         }
 
         [Authorize(Roles = "landlord,admin,moderator")]
-        [Route("Landlords/Manage/Tenants/{tenantId}")]
+        [Route("landlords/manage/tenants/{tenantId}")]
         public async Task<IActionResult> GetSelectedTenant(int tenantId)
         {
             //var selectedTenant = await _context.Tenants.Where(t => t.Id == tenantId).FirstOrDefaultAsync();
@@ -245,7 +262,7 @@ namespace FaturaTakip.Controllers
         }
 
         [Authorize(Roles = "landlord,admin,moderator")]
-        [Route("Landlords/Manage/Tenants/Add")]
+        [Route("landlords/manage/tenants/add")]
         public IActionResult AddTenantIntoApartment()
         {
             SetViewBags();
@@ -253,7 +270,7 @@ namespace FaturaTakip.Controllers
         }
 
         [Authorize(Roles = "landlord,admin,moderator")]
-        [Route("Landlords/Manage/Tenants/Add")]
+        [Route("landlords/manage/tenants/add")]
         [HttpPost]
         public async Task<IActionResult> AddTenantIntoApartment([Bind("GovermentId")] Tenant tenant, [Bind("Id")] Apartment apartment)
         {
@@ -285,7 +302,7 @@ namespace FaturaTakip.Controllers
 
         // GET: Landlords/Manage/Tenants/Delete/5
         [Authorize(Roles = "landlord,admin,moderator")]
-        [Route("Landlords/Manage/Tenants/Delete/{tenantId}")]
+        [Route("landlords/manage/tenants/delete/{tenantId}")]
         public async Task<IActionResult> DeleteTenant(int? tenantId)
         {
             if (tenantId == null || _context.Tenants == null)            
