@@ -166,15 +166,18 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
                 }
             }
 
+            var userToUpdate = GetSelectedUserFromTable(user.GovermentId);
 
             if (Input.Name != user.Name)
             {
                 user.Name = Input.Name;
+                userToUpdate.Name = Input.Name;
             }
 
             if (Input.LastName != user.LastName)
             {
                 user.LastName = Input.LastName;
+                userToUpdate.LastName = Input.LastName;
             }
 
             var updateResult = await UpdateUserRoles(user);
@@ -196,6 +199,19 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
 
 
             return RedirectToPage();
+        }
+
+        private User GetSelectedUserFromTable(string govermentId)
+        {
+            var landlord = _context.Landlords.FirstOrDefault(l => l.GovermentId == govermentId);
+            if (landlord != null)
+                return landlord;
+
+            var tenant = _context.Tenants.FirstOrDefault(t => t.GovermentId == govermentId);
+            if (tenant != null)
+                return tenant;
+
+            return null;
         }
 
         private async Task<bool> UpdateUserRoles(InvoiceTrackUser user)

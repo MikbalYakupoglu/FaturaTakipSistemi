@@ -56,7 +56,7 @@ namespace FaturaTakip.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Floor,DoorNumber,Type,Block,FKLandlordId")] Apartment apartment)
+        public async Task<IActionResult> Create([Bind("Id,Floor,DoorNumber,Type,Block,FKLandlordId,RentPrice,Rented")] Apartment apartment)
         {
             SetBlockAndTypeData();
             var landlord = apartment.FKLandlordId;
@@ -105,7 +105,7 @@ namespace FaturaTakip.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Floor,DoorNumber,Type,Block")] Apartment apartment)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Floor,DoorNumber,Type,Block,FKLandlordId,RentPrice,Rented")] Apartment apartment)
         {
             SetBlockAndTypeData();
 

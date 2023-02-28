@@ -198,21 +198,21 @@ namespace FaturaTakip.Controllers
 
         #region Message
 
-        [Authorize(Roles = "landlord,admin,moderator")]
-        [Route("landlords/manage/messages")]
-        public async Task<IActionResult> ListMessages()
-        {
-            var landlordId = GetLoginedLandlordId();
+        //[Authorize(Roles = "landlord,admin,moderator")]
+        //[Route("landlords/manage/messages")]
+        //public async Task<IActionResult> ListMessages()
+        //{
+        //    var landlordId = GetLoginedLandlordId();
 
-            var landlordMessages = await _context.Messages.Where(m => m.Landlord.Id == landlordId)
-                .Include(m => m.Tenant)
-                .Include(m=> m.Apartment)
-                .ToListAsync();
+        //    var landlordMessages = await _context.Messages.Where(m => m.Landlord.Id == landlordId)
+        //        .Include(m => m.Tenant)
+        //        .Include(m=> m.Apartment)
+        //        .ToListAsync();
 
-            ViewData["Messages"] = landlordMessages;
+        //    ViewData["Messages"] = landlordMessages;
 
-            return View(landlordMessages);
-        }
+        //    return View(landlordMessages);
+        //}
 
 
 
@@ -240,7 +240,7 @@ namespace FaturaTakip.Controllers
 
         [Authorize(Roles = "landlord,admin,moderator")]
         [Route("landlords/manage/tenants/{tenantId}")]
-        public async Task<IActionResult> GetSelectedTenant(int tenantId)
+        public async Task<IActionResult> GetSelectedTenant(int? tenantId)
         {
             //var selectedTenant = await _context.Tenants.Where(t => t.Id == tenantId).FirstOrDefaultAsync();
             //return View(selectedTenant);
@@ -294,6 +294,7 @@ namespace FaturaTakip.Controllers
                 FKTenantId = tenantToAdd.Id,
                 Status = true
             };
+            _context.Apartments.First(a => a.Id == rentedApartment.FKApartmentId).Rented = true;
 
             _context.Add(rentedApartment);
             await _context.SaveChangesAsync();
@@ -345,7 +346,7 @@ namespace FaturaTakip.Controllers
             ViewData["ApartmentDetails"] = new SelectList((IEnumerable)apartmentDetails, "Key", "Value");
         }
 
-        private int GetLoginedLandlordId()
+        public int GetLoginedLandlordId()
         {
             var loginedUser = _userManager.GetUserId(HttpContext.User);
             var landlordId = (from u in _context.Users
