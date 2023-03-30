@@ -333,6 +333,7 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
             userToAdd.Email = user.Email;
             userToAdd.Phone = user.PhoneNumber;
             userToAdd.YearOfBirth = user.YearOfBirth;
+            userToAdd.FK_UserId = user.Id;
 
             return userToAdd;
         }

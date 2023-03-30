@@ -5,15 +5,25 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using FaturaTakip.Business.Interface;
+using FaturaTakip.Data;
+using FaturaTakip.Data.Models;
+using FaturaTakip.Data.Models.Abstract;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace FaturaTakip.Areas.Identity.Pages.Account.Manage
 {
     public class DeletePersonalDataModel : PageModel
     {
+        private readonly InvoiceTrackContext _context;
+        private readonly ITenantService _tenantService;
+        private readonly ILandlordService _landlordService;
+
+
         private readonly UserManager<InvoiceTrackUser> _userManager;
         private readonly SignInManager<InvoiceTrackUser> _signInManager;
         private readonly ILogger<DeletePersonalDataModel> _logger;
@@ -21,11 +31,19 @@ namespace FaturaTakip.Areas.Identity.Pages.Account.Manage
         public DeletePersonalDataModel(
             UserManager<InvoiceTrackUser> userManager,
             SignInManager<InvoiceTrackUser> signInManager,
-            ILogger<DeletePersonalDataModel> logger)
+            ILogger<DeletePersonalDataModel> logger,
+
+            InvoiceTrackContext context,
+            ITenantService tenantService,
+            ILandlordService landlordService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+
+            _context = context;
+            _tenantService = tenantService;
+            _landlordService = landlordService;
         }
 
         /// <summary>
@@ -85,6 +103,29 @@ namespace FaturaTakip.Areas.Identity.Pages.Account.Manage
                     return Page();
                 }
             }
+
+            var isTenant = await _tenantService.IsTenantExistAsync(user.Id);
+            if (isTenant)
+            {
+                var isRegistered = await _tenantService.IsTenantRegisteredInHouseAsync(user.Id);
+                if (isRegistered)
+                {
+                    ModelState.AddModelError(string.Empty, "Tenant is Registered with House.");
+                    return Page();
+                }
+            }
+
+            var isLandlord = await _landlordService.IsLandlordExistAsync(user.Id);
+            if (isLandlord)
+            {
+                var isRegistered = await _landlordService.IsLandlordRegisteredInHouseAsync(user.Id);
+                if(isRegistered)
+                {
+                    ModelState.AddModelError(string.Empty, "Landlord is Registered with House.");
+                    return Page();
+                }
+            }
+
 
             var result = await _userManager.DeleteAsync(user);
             var userId = await _userManager.GetUserIdAsync(user);

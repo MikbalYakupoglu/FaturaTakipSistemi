@@ -1,5 +1,7 @@
 using System.Globalization;
 using System.Reflection;
+using FaturaTakip.Business.Concrete;
+using FaturaTakip.Business.Interface;
 using FaturaTakip.Data;
 using FaturaTakip.Resources;
 using FaturaTakip.Services;
@@ -14,6 +16,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddSingleton<CommonLocalizationService>();
+
+builder.Services.AddScoped<ITenantService, TenantManager>();
+builder.Services.AddScoped<ILandlordService, LandlordManager>();
+
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<InvoiceTrackContext>(options =>
