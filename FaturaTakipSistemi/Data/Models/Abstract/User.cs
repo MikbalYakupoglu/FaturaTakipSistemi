@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FaturaTakip.Data.Models.Abstract;
@@ -23,6 +24,7 @@ public abstract class User
     [StringLength(10)]
     public string Phone { get; set; }
 
+    [ValidateNever]
     public string FK_UserId { get; set; }
 
 }

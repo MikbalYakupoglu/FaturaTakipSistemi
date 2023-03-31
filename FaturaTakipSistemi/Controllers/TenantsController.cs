@@ -13,16 +13,17 @@ using FaturaTakip.Utils;
 using GovermentIdVerification;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
+using FaturaTakip.Business.Interface;
 
 namespace FaturaTakip.Controllers
 {
     public class TenantsController : Controller
     {
-        private readonly InvoiceTrackContext _context;
+        private readonly ITenantService _tenantService;
 
-        public TenantsController(InvoiceTrackContext context)
+        public TenantsController(ITenantService tenantService)
         {
-            _context = context;
+            _tenantService = tenantService;
         }
 
 
@@ -31,26 +32,27 @@ namespace FaturaTakip.Controllers
         [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Index()
         {
-              return View(await _context.Tenants.ToListAsync());
+            var tenants = await _tenantService.GetAllTenants();
+            return View(tenants.Data);
         }
 
         // GET: Tenants/Details/5
         [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Tenants == null)
+            if (id == null || !await _tenantService.IsAnyTenantExistAsync())
             {
                 return NotFound();
             }
 
-            var tenant = await _context.Tenants
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (tenant == null)
+            var tenant = await _tenantService.GetTenantByIdAsync(id);
+
+            if (!tenant.Success)
             {
                 return NotFound();
             }
 
-            return View(tenant);
+            return View(tenant.Data);
         }
 
         // GET: Tenants/Create
@@ -60,47 +62,46 @@ namespace FaturaTakip.Controllers
             return View();
         }
 
-        // POST: Tenants/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "admin,moderator")]
-        public async Task<IActionResult> Create([Bind($"{nameof(Tenant.Id)},{nameof(Tenant.Name)},{nameof(Tenant)},{nameof(Tenant.GovermentId)}," +
-                                                      $"{nameof(Tenant.YearOfBirth)},{nameof(Tenant.Email)},{nameof(Tenant.Phone)},{nameof(Tenant.LisencePlate)}")] Tenant tenant)
-        {
-            if (ModelState.IsValid)
-            {
-                if (!MernisUtils.VerifyGovermentId(tenant.GovermentId, tenant.Name, tenant.LastName, tenant.YearOfBirth).Result)
-                {
-                    ViewData["VerificationError"] = "Girdiğiniz Bilgiler Yanlış, Lütfen kontrol ediniz.";
-                    return View(tenant);
-                }
+        //// POST: Tenants/Create
+        //// To protect from overposting attacks, enable the specific properties you want to bind to.
+        //// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //[Authorize(Roles = "admin,moderator")]
+        //public async Task<IActionResult> Create([Bind($"{nameof(Tenant.Id)},{nameof(Tenant.Name)},{nameof(Tenant)},{nameof(Tenant.GovermentId)}," +
+        //                                              $"{nameof(Tenant.YearOfBirth)},{nameof(Tenant.Email)},{nameof(Tenant.Phone)},{nameof(Tenant.LisencePlate)}")] Tenant tenant)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        if (!MernisUtils.VerifyGovermentId(tenant.GovermentId, tenant.Name, tenant.LastName, tenant.YearOfBirth).Result)
+        //        {
+        //            ViewData["VerificationError"] = "Girdiğiniz Bilgiler Yanlış, Lütfen kontrol ediniz.";
+        //            return View(tenant);
+        //        }
 
-                //CreatePasswordHash(tenant, "123456");
 
-                _context.Add(tenant);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(tenant);
-        }
+        //        _context.Add(tenant);
+        //        await _context.SaveChangesAsync();
+        //        return RedirectToAction(nameof(Index));
+        //    }
+        //    return View(tenant);
+        //}
 
         // GET: Tenants/Edit/5
         [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Tenants == null)
+            if (id == null || !await _tenantService.IsAnyTenantExistAsync())
             {
                 return NotFound();
             }
 
-            var tenant = await _context.Tenants.FindAsync(id);
-            if (tenant == null)
+            var tenant = await _tenantService.GetTenantByIdAsync(id);
+            if (!tenant.Success)
             {
                 return NotFound();
             }
-            return View(tenant);
+            return View(tenant.Data);
         }
 
         // POST: Tenants/Edit/5
@@ -109,24 +110,29 @@ namespace FaturaTakip.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "admin,moderator")]
-        public async Task<IActionResult> Edit(int id, [Bind($"{nameof(Tenant.Id)},{nameof(Tenant.Name)},{nameof(Tenant.LastName)},{nameof(Tenant.GovermentId)}," +
+        public async Task<IActionResult> Edit(int id, [Bind($"{nameof(Tenant.Name)},{nameof(Tenant.LastName)},{nameof(Tenant.GovermentId)}," +
                                                             $"{nameof(Tenant.YearOfBirth)},{nameof(Tenant.Email)},{nameof(Tenant.Phone)},{nameof(Tenant.LisencePlate)}")] Tenant tenant)
         {
-            if (id != tenant.Id)
+            var tenantToEdit = await _tenantService.GetTenantByIdAsync(id);
+
+            if (!tenantToEdit.Success)
             {
                 return NotFound();
             }
+
+            tenant.Id = tenantToEdit.Data.Id;
+            tenant.FK_UserId = tenantToEdit.Data.FK_UserId;
+
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(tenant);
-                    await _context.SaveChangesAsync();
+                    await _tenantService.UpdateTenantAsync(tenant);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!IsTenantExists(tenant.Id))
+                    if (!await _tenantService.IsTenantExistAsync(id))
                     {
                         return NotFound();
                     }
@@ -144,19 +150,18 @@ namespace FaturaTakip.Controllers
         [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Tenants == null)
+            if (id == null || !await _tenantService.IsAnyTenantExistAsync())
             {
                 return NotFound();
             }
 
-            var tenant = await _context.Tenants
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (tenant == null)
+            var tenant = await _tenantService.GetTenantByIdAsync(id);
+            if (!tenant.Success)
             {
                 return NotFound();
             }
 
-            return View(tenant);
+            return View(tenant.Data);
         }
 
         // POST: Tenants/Delete/5
@@ -165,17 +170,17 @@ namespace FaturaTakip.Controllers
         [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Tenants == null)
+            if (!await _tenantService.IsAnyTenantExistAsync())
             {
                 return Problem("Entity set 'InvoiceTrackContext.Tenants'  is null.");
             }
-            var tenant = await _context.Tenants.FindAsync(id);
-            if (tenant != null)
+
+            var tenant = await _tenantService.GetTenantByIdAsync(id);
+            if (tenant.Success)
             {
-                _context.Tenants.Remove(tenant);
+                await _tenantService.RemoveTenantAsync(tenant.Data);
             }
             
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
@@ -190,10 +195,7 @@ namespace FaturaTakip.Controllers
 
 
         #region Helpers
-        private bool IsTenantExists(int id)
-        {
-            return _context.Tenants.Any(e => e.Id == id);
-        }
+
 
         #endregion
     }

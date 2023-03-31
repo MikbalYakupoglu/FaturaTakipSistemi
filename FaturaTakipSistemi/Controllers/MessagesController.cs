@@ -264,7 +264,7 @@ namespace FaturaTakip.Controllers
             if (landlord.Success)
                 return landlord.Data;
 
-            var tenant = await _tenantService.GetTenantByUserIdAsync(loginedUser.Id);
+            var tenant = await _tenantService.GetTenantByIdAsync(loginedUser.Id);
             if (tenant.Success)
                 return tenant.Data;
 

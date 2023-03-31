@@ -7,9 +7,14 @@ namespace FaturaTakip.Data
 {
     public class InvoiceTrackContext : IdentityDbContext<InvoiceTrackUser>
     {
-        public InvoiceTrackContext(DbContextOptions<InvoiceTrackContext> options) : base(options)
+        //public InvoiceTrackContext(DbContextOptions<InvoiceTrackContext> options) : base(options)
+        //{
+
+        //}
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            
+            optionsBuilder.UseSqlServer(@"Server=DESKTOP-BCSUV51;Database=InvoiceTrackContext;Trusted_Connection=True;");
         }
 
         public DbSet<Apartment> Apartments { get; set; }
@@ -25,6 +30,7 @@ namespace FaturaTakip.Data
             modelBuilder.Entity<IdentityUserLogin<string>>().HasKey(l => l.UserId);
             modelBuilder.Entity<IdentityUserRole<string>>().HasKey(l => new {l.UserId, l.RoleId });
             modelBuilder.Entity<IdentityUserToken<string>>().HasNoKey();
+
 
             modelBuilder.Entity<Apartment>().ToTable("Apartments");
             modelBuilder.Entity<Debt>().ToTable("Debts");

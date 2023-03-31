@@ -16,15 +16,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddSingleton<CommonLocalizationService>();
+builder.Services.AddSingleton<InvoiceTrackContext>();
 
 builder.Services.AddScoped<ITenantService, TenantManager>();
 builder.Services.AddScoped<ILandlordService, LandlordManager>();
 builder.Services.AddScoped<IRentedApartmentService, RentedApartmentManager>();
 
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<InvoiceTrackContext>(options =>
-    options.UseSqlServer(connectionString));
+//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+//builder.Services.AddDbContext<InvoiceTrackContext>(options =>
+//    options.UseSqlServer(connectionString));
 
 builder.Services.AddDefaultIdentity<InvoiceTrackUser>(options =>
 {
