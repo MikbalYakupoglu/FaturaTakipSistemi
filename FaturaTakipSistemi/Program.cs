@@ -19,6 +19,7 @@ builder.Services.AddSingleton<CommonLocalizationService>();
 
 builder.Services.AddScoped<ITenantService, TenantManager>();
 builder.Services.AddScoped<ILandlordService, LandlordManager>();
+builder.Services.AddScoped<IRentedApartmentService, RentedApartmentManager>();
 
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");

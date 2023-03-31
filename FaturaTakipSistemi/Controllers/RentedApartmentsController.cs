@@ -8,19 +8,26 @@ using Microsoft.EntityFrameworkCore;
 using FaturaTakip.Data;
 using FaturaTakip.Data.Models;
 using FaturaTakip.Models;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
+using FaturaTakip.Business.Interface;
 
 namespace FaturaTakip.Controllers
 {
     public class RentedApartmentsController : Controller
     {
         private readonly InvoiceTrackContext _context;
+        private readonly IRentedApartmentService _rentedApartmentService;
 
-        public RentedApartmentsController(InvoiceTrackContext context)
+        public RentedApartmentsController(InvoiceTrackContext context,
+            IRentedApartmentService rentedApartmentService)
         {
             _context = context;
+            _rentedApartmentService = rentedApartmentService;
         }
 
         // GET: RentedApartments
+        [Authorize(Roles = "admin,moderator,landlord")]
         public async Task<IActionResult> Index()
         {
             var invoiceTrackContext = _context.RentedApartments.Include(r => r.Apartment).Include(r => r.Apartment.Landlord).Include(r => r.Tenant);
@@ -28,6 +35,7 @@ namespace FaturaTakip.Controllers
         }
 
         // GET: RentedApartments/Details/5
+        [Authorize(Roles = "admin,moderator,landlord")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.RentedApartments == null)
@@ -49,10 +57,11 @@ namespace FaturaTakip.Controllers
         }
 
         // GET: RentedApartments/Create
+        [Authorize(Roles = "admin,moderator")]
         public IActionResult Create()
         {
+
             ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id");
-            //ViewData["FKLandlordId"] = new SelectList(_context.Landlords, "Id", "Id");
             ViewData["FKTenantId"] = new SelectList(_context.Tenants, "Id", "Id");
             return View();
         }
@@ -62,6 +71,7 @@ namespace FaturaTakip.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Create([Bind("Id,Status,FKTenantId,FKApartmentId,FKLandlordId")] RentedApartment rentedApartment)
         {
             if (ModelState.IsValid)
@@ -72,12 +82,12 @@ namespace FaturaTakip.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id", rentedApartment.FKApartmentId);
-            //ViewData["FKLandlordId"] = new SelectList(_context.Landlords, "Id", "Id", rentedApartment.Apartment.FKLandlordId);
             ViewData["FKTenantId"] = new SelectList(_context.Tenants, "Id", "Id", rentedApartment.FKTenantId);
             return View(rentedApartment);
         }
 
         // GET: RentedApartments/Edit/5
+        [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.RentedApartments == null)
@@ -90,8 +100,9 @@ namespace FaturaTakip.Controllers
             {
                 return NotFound();
             }
+
+
             ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id", rentedApartment.FKApartmentId);
-            //ViewData["FKLandlordId"] = new SelectList(_context.Landlords, "Id", "Id", rentedApartment.Apartment.FKLandlordId);
             ViewData["FKTenantId"] = new SelectList(_context.Tenants, "Id", "Id", rentedApartment.FKTenantId);
             return View(rentedApartment);
         }
@@ -101,6 +112,7 @@ namespace FaturaTakip.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Status,FKTenantId,FKApartmentId,FKLandlordId")] RentedApartment rentedApartment)
         {
             if (id != rentedApartment.Id)
@@ -128,13 +140,15 @@ namespace FaturaTakip.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
+
             ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id", rentedApartment.FKApartmentId);
-            ViewData["FKLandlordId"] = new SelectList(_context.Landlords, "Id", "Id", rentedApartment.Apartment.FKLandlordId);
             ViewData["FKTenantId"] = new SelectList(_context.Tenants, "Id", "Id", rentedApartment.FKTenantId);
             return View(rentedApartment);
         }
 
         // GET: RentedApartments/Delete/5
+        [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.RentedApartments == null)
@@ -158,6 +172,7 @@ namespace FaturaTakip.Controllers
         // POST: RentedApartments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             if (_context.RentedApartments == null)
@@ -178,5 +193,9 @@ namespace FaturaTakip.Controllers
         {
           return _context.RentedApartments.Any(e => e.Id == id);
         }
+
+        #region Helpers
+
+        #endregion
     }
 }

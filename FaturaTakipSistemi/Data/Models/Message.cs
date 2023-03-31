@@ -11,6 +11,7 @@ namespace FaturaTakip.Data.Models
         public int? FKTenantId { get; set; }
         public int? FKLandlordId { get; set; }
         public int? FKApartmentId { get; set; }
+        public bool IsVisible { get; set; }
 
 
         [ValidateNever]

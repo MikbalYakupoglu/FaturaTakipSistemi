@@ -11,6 +11,7 @@ using FaturaTakip.Models;
 using Microsoft.AspNetCore.Identity;
 using FaturaTakip.Data.Models.Abstract;
 using Microsoft.AspNetCore.Authorization;
+using FaturaTakip.Business.Interface;
 
 namespace FaturaTakip.Controllers
 {
@@ -18,41 +19,22 @@ namespace FaturaTakip.Controllers
     {
         private readonly InvoiceTrackContext _context;
         private readonly UserManager<InvoiceTrackUser> _userManager;
+        private readonly ITenantService _tenantService;
+        private readonly ILandlordService _landlordService;
 
         public MessagesController(InvoiceTrackContext context,
-            UserManager<InvoiceTrackUser> userManager)
+            UserManager<InvoiceTrackUser> userManager,
+            ITenantService tenantService,
+            ILandlordService landlordService)
         {
             _context = context;
             _userManager = userManager;
+            _tenantService = tenantService;
+            _landlordService = landlordService;
         }
 
-        private InvoiceTrackUser GetLoginedUser()
-        {
-            var loginedUserId = _userManager.GetUserId(HttpContext.User);
-            if (loginedUserId == null)
-                return null;
-
-            var loginedUser = _context.Users.First(u => u.Id == loginedUserId);
-
-            return loginedUser;
-        }
-        private async Task<User> GetLoginedUserWithType()
-        {
-            var loginedUser = GetLoginedUser();
-
-            var landlord = _context.Landlords.FirstOrDefault(l => l.GovermentId == loginedUser.GovermentId);
-            if (landlord != null)
-                return landlord;
-
-            var tenant = _context.Tenants.FirstOrDefault(t => t.GovermentId == loginedUser.GovermentId);
-            if (tenant != null)
-                return tenant;
-
-            return null;
-
-        }
         // GET: Messages
-        [Authorize]
+        [Authorize(Roles = "admin,moderator,landlord,tenant")]
         public async Task<IActionResult> Index()
         {
             var loginedUser = GetLoginedUserWithType().Result;
@@ -61,15 +43,21 @@ namespace FaturaTakip.Controllers
             if (loginedUser != null)
             {
                 if (loginedUser.GetType() == landlord.GetType())
-                    return View(_context.Messages
+                {
+                    var messages = _context.Messages
                         .Include(m => m.Tenant)
-                        .Where(m => m.FKLandlordId == loginedUser.Id));
-                
+                        .Where(m => m.FKLandlordId == loginedUser.Id);
+                    return View(messages);
+                }
+
 
                 if (loginedUser.GetType() == tenant.GetType())
-                    return View(_context.Messages
-                        .Include(m=> m.Landlord)
-                        .Where(m => m.FKTenantId == loginedUser.Id));
+                {
+                    var messages = _context.Messages
+                        .Include(m => m.Landlord)
+                        .Where(m => m.FKTenantId == loginedUser.Id);
+                    return View(messages);
+                }
             }
             else if (await _userManager.IsInRoleAsync(GetLoginedUser(), "admin") || (await _userManager.IsInRoleAsync(GetLoginedUser(), "moderator")))
             {
@@ -83,6 +71,7 @@ namespace FaturaTakip.Controllers
             return Unauthorized();
         }
 
+        [Authorize(Roles = "admin,moderator,landlord,tenant")]
         public async Task<IActionResult> View(int? id)
         {
             if (id == null || _context.Messages == null)
@@ -104,6 +93,7 @@ namespace FaturaTakip.Controllers
 
 
         // GET: Messages/Details/5
+        [Authorize(Roles = "admin,moderator,landlord,tenant")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.Messages == null)
@@ -124,6 +114,7 @@ namespace FaturaTakip.Controllers
         }
 
         // GET: Messages/Create
+        [Authorize(Roles = "admin,moderator,landlord,tenant")]
         public IActionResult Create()
         {
             ViewData["FKLandlordId"] = new SelectList(_context.Landlords, "Id", "Id");
@@ -138,6 +129,8 @@ namespace FaturaTakip.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Title,Body,FKTenantId,FKLandlordId,FkApartmentId")] Message message)
         {
+            message.IsVisible = true;
+
             if (ModelState.IsValid)
             {
                 _context.Add(message);
@@ -150,6 +143,7 @@ namespace FaturaTakip.Controllers
         }
 
         // GET: Messages/Edit/5
+        [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Messages == null)
@@ -172,6 +166,7 @@ namespace FaturaTakip.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Body,FKTenantId,FKLandlordId,FkApartmentId")] Message message)
         {
             if (id != message.Id)
@@ -205,6 +200,7 @@ namespace FaturaTakip.Controllers
         }
 
         // GET: Messages/Delete/5
+        [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Messages == null)
@@ -227,6 +223,7 @@ namespace FaturaTakip.Controllers
         // POST: Messages/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             if (_context.Messages == null)
@@ -247,5 +244,33 @@ namespace FaturaTakip.Controllers
         {
             return _context.Messages.Any(e => e.Id == id);
         }
+
+        #region Helpers
+        private InvoiceTrackUser GetLoginedUser()
+        {
+            var loginedUserId = _userManager.GetUserId(HttpContext.User);
+            if (loginedUserId == null)
+                return null;
+
+            var loginedUser = _context.Users.First(u => u.Id == loginedUserId);
+
+            return loginedUser;
+        }
+        private async Task<User> GetLoginedUserWithType()
+        {
+            var loginedUser = GetLoginedUser();
+
+            var landlord = await _landlordService.GetLandlordByUserIdAsync(loginedUser.Id);
+            if (landlord.Success)
+                return landlord.Data;
+
+            var tenant = await _tenantService.GetTenantByUserIdAsync(loginedUser.Id);
+            if (tenant.Success)
+                return tenant.Data;
+
+            return null;
+
+        }
+        #endregion
     }
 }

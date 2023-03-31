@@ -11,6 +11,8 @@ using FaturaTakip.Data.Models.Abstract;
 using FaturaTakip.Models;
 using FaturaTakip.Utils;
 using GovermentIdVerification;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
 
 namespace FaturaTakip.Controllers
 {
@@ -24,13 +26,16 @@ namespace FaturaTakip.Controllers
         }
 
 
+        #region Tenants
         // GET: Tenants
+        [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Index()
         {
               return View(await _context.Tenants.ToListAsync());
         }
 
         // GET: Tenants/Details/5
+        [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.Tenants == null)
@@ -49,6 +54,7 @@ namespace FaturaTakip.Controllers
         }
 
         // GET: Tenants/Create
+        [Authorize(Roles = "admin,moderator")]
         public IActionResult Create()
         {
             return View();
@@ -59,6 +65,7 @@ namespace FaturaTakip.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Create([Bind($"{nameof(Tenant.Id)},{nameof(Tenant.Name)},{nameof(Tenant)},{nameof(Tenant.GovermentId)}," +
                                                       $"{nameof(Tenant.YearOfBirth)},{nameof(Tenant.Email)},{nameof(Tenant.Phone)},{nameof(Tenant.LisencePlate)}")] Tenant tenant)
         {
@@ -80,6 +87,7 @@ namespace FaturaTakip.Controllers
         }
 
         // GET: Tenants/Edit/5
+        [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Tenants == null)
@@ -100,6 +108,7 @@ namespace FaturaTakip.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Edit(int id, [Bind($"{nameof(Tenant.Id)},{nameof(Tenant.Name)},{nameof(Tenant.LastName)},{nameof(Tenant.GovermentId)}," +
                                                             $"{nameof(Tenant.YearOfBirth)},{nameof(Tenant.Email)},{nameof(Tenant.Phone)},{nameof(Tenant.LisencePlate)}")] Tenant tenant)
         {
@@ -117,7 +126,7 @@ namespace FaturaTakip.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!TenantExists(tenant.Id))
+                    if (!IsTenantExists(tenant.Id))
                     {
                         return NotFound();
                     }
@@ -132,6 +141,7 @@ namespace FaturaTakip.Controllers
         }
 
         // GET: Tenants/Delete/5
+        [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Tenants == null)
@@ -152,6 +162,7 @@ namespace FaturaTakip.Controllers
         // POST: Tenants/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             if (_context.Tenants == null)
@@ -168,18 +179,22 @@ namespace FaturaTakip.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool TenantExists(int id)
+        #endregion
+
+
+        #region Manage
+
+
+        #endregion
+
+
+
+        #region Helpers
+        private bool IsTenantExists(int id)
         {
-          return _context.Tenants.Any(e => e.Id == id);
+            return _context.Tenants.Any(e => e.Id == id);
         }
 
-        //private static void CreatePasswordHash<T>(T user, string password) where  T : User
-        //{
-        //    byte[] passwordHash, passwordSalt;
-        //    HashingHelper.CreatePasswordHash(password, out passwordHash, out passwordSalt);
-
-        //    user.PasswordHash = passwordHash;
-        //    user.PasswordSalt = passwordSalt;
-        //}
+        #endregion
     }
 }

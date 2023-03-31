@@ -23,14 +23,16 @@ namespace FaturaTakip.Controllers
             _context = context;
             _userManager = userManager;
         }
-        
+
         #region Landlord
+        [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Index()
         {
             return View(await _context.Landlords.ToListAsync());
         }
 
         // GET: Landlords/Details/5
+        [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.Landlords == null)
@@ -49,6 +51,7 @@ namespace FaturaTakip.Controllers
         }
 
         // GET: Landlords/Create
+        [Authorize(Roles = "admin,moderator")]
         public IActionResult Create()
         {
             return View();
@@ -59,6 +62,7 @@ namespace FaturaTakip.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Create([Bind($"{nameof(Landlord.Id)},{nameof(Landlord.Name)},{nameof(Landlord.LastName)},{nameof(Landlord.GovermentId)}," +
                                                       $"{nameof(Landlord.YearOfBirth)},{nameof(Landlord.Email)},{nameof(Landlord.Phone)}")] Landlord landlord)
         {
@@ -77,6 +81,7 @@ namespace FaturaTakip.Controllers
         }
 
         // GET: Landlords/Edit/5
+        [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Landlords == null)
@@ -97,6 +102,7 @@ namespace FaturaTakip.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Edit(int id, [Bind(include: $"{nameof(Landlord.Id)},{nameof(Landlord.Name)},{nameof(Landlord.LastName)},{nameof(Landlord.GovermentId)}," +
                                                             $"{nameof(Landlord.YearOfBirth)},{nameof(Landlord.Email)},{nameof(Landlord.Phone)}")] Landlord landlord)
         {
@@ -134,6 +140,7 @@ namespace FaturaTakip.Controllers
         }
 
         // GET: Landlords/Delete/5
+        [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Landlords == null)
@@ -154,6 +161,7 @@ namespace FaturaTakip.Controllers
         // POST: Landlords/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             if (_context.Landlords == null)
@@ -231,9 +239,6 @@ namespace FaturaTakip.Controllers
                     .Include(ra => ra.Apartment)
                     .Include(ra => ra.Tenant)
                     .ToListAsync();
-            //from ra in _context.RentedApartments
-            //          where ra.Apartment.Landlord.Id == landlordId
-            //          select ra;
 
             return View(landlordsRentedApartments);
         }
@@ -242,8 +247,6 @@ namespace FaturaTakip.Controllers
         [Route("landlords/manage/tenants/{tenantId}")]
         public async Task<IActionResult> GetSelectedTenant(int? tenantId)
         {
-            //var selectedTenant = await _context.Tenants.Where(t => t.Id == tenantId).FirstOrDefaultAsync();
-            //return View(selectedTenant);
             if (tenantId == null || _context.Tenants == null)
             {
                 return NotFound();
@@ -281,14 +284,14 @@ namespace FaturaTakip.Controllers
                 ViewData["Hata"] = "TCNO ile Kiracı Bulunamadı";
                 SetViewBags();
 
-                RentedApartment model = new RentedApartment()
+                RentedApartment model = new()
                 {
                     Apartment = apartment
                 };
                 return View(model);
             }
 
-            RentedApartment rentedApartment = new RentedApartment()
+            RentedApartment rentedApartment = new()
             {
                 FKApartmentId = apartment.Id,
                 FKTenantId = tenantToAdd.Id,
@@ -337,7 +340,7 @@ namespace FaturaTakip.Controllers
             var landlordsApartments = _context.Apartments.Where(a => a.FKLandlordId == loginedLandlordId);
             var landlordsUnrentedApartments = landlordsApartments.Except(_context.RentedApartments.Select(ra => ra.Apartment));
 
-            Dictionary<int, string> apartmentDetails = new Dictionary<int, string>();
+            Dictionary<int, string> apartmentDetails = new();
             foreach (var apartment in landlordsUnrentedApartments)
             {
                 apartmentDetails[apartment.Id] = "Block : " + apartment.Block + " - Floor : " + apartment.Floor + " - Door Number : " + apartment.DoorNumber;

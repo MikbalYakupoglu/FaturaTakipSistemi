@@ -19,7 +19,6 @@ namespace FaturaTakip.Areas.Identity.Pages.Account.Manage
 {
     public class DeletePersonalDataModel : PageModel
     {
-        private readonly InvoiceTrackContext _context;
         private readonly ITenantService _tenantService;
         private readonly ILandlordService _landlordService;
 
@@ -33,7 +32,6 @@ namespace FaturaTakip.Areas.Identity.Pages.Account.Manage
             SignInManager<InvoiceTrackUser> signInManager,
             ILogger<DeletePersonalDataModel> logger,
 
-            InvoiceTrackContext context,
             ITenantService tenantService,
             ILandlordService landlordService)
         {
@@ -41,7 +39,6 @@ namespace FaturaTakip.Areas.Identity.Pages.Account.Manage
             _signInManager = signInManager;
             _logger = logger;
 
-            _context = context;
             _tenantService = tenantService;
             _landlordService = landlordService;
         }
@@ -124,6 +121,12 @@ namespace FaturaTakip.Areas.Identity.Pages.Account.Manage
                     ModelState.AddModelError(string.Empty, "Landlord is Registered with House.");
                     return Page();
                 }
+            }
+
+            if(user.NormalizedEmail == "ADMIN@ADMIN.COM")
+            {
+                ModelState.AddModelError(string.Empty, "Admin cannot be deleted.");
+                return Page();
             }
 
 
