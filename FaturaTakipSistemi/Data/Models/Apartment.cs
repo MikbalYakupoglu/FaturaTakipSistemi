@@ -1,4 +1,5 @@
 ﻿
+using FaturaTakip.Data.Models.Abstract;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -27,7 +28,7 @@ namespace FaturaTakip.Data.Models
         [Display(Name = "3+1")]
         ThreePlusOne,
     }
-    public class Apartment
+    public class Apartment : IEntity
     {
         public int Id { get; set; }
         public short Floor { get; set; }

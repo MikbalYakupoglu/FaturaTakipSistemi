@@ -12,9 +12,9 @@ namespace FaturaTakip.Business.Interface
         Task<bool> IsTenantExistAsync(string userId);
         Task<bool> IsTenantRegisteredInHouseAsync(int tenantId);
         Task<bool> IsTenantRegisteredInHouseAsync(string userId);
-        Task<Result> DeleteTenantAsync(int tenantId);
+        Task<Result> AddTenantAsync(Tenant tenant);
+        Task<Result> RemoveTenantAsync(Tenant tenant);  
         Task<Result> UpdateTenantAsync(Tenant tenant);
         Task<bool> IsAnyTenantExistAsync();
-        Task<Result> RemoveTenantAsync(Tenant tenant);  
     }
 }

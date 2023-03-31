@@ -1,8 +1,12 @@
 using System.Globalization;
 using System.Reflection;
+using AspNetCoreHero.ToastNotification;
+using AspNetCoreHero.ToastNotification.Extensions;
 using FaturaTakip.Business.Concrete;
 using FaturaTakip.Business.Interface;
 using FaturaTakip.Data;
+using FaturaTakip.DataAccess.Abstract;
+using FaturaTakip.DataAccess.Concrete;
 using FaturaTakip.Resources;
 using FaturaTakip.Services;
 using Microsoft.AspNetCore.Builder;
@@ -18,10 +22,21 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<CommonLocalizationService>();
 builder.Services.AddSingleton<InvoiceTrackContext>();
 
+builder.Services.AddScoped<ITenantDal, EfTenantDal>();
+
+
 builder.Services.AddScoped<ITenantService, TenantManager>();
 builder.Services.AddScoped<ILandlordService, LandlordManager>();
 builder.Services.AddScoped<IRentedApartmentService, RentedApartmentManager>();
 
+
+builder.Services.AddNotyf(config =>
+{
+    config.DurationInSeconds = 5;
+    config.IsDismissable = true;
+    config.Position = NotyfPosition.BottomRight;
+    config.HasRippleEffect = true;
+});
 
 //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 //builder.Services.AddDbContext<InvoiceTrackContext>(options =>
@@ -115,6 +130,9 @@ app.MapControllerRoute(
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseNotyf();
+
 app.MapRazorPages();
 
 app.Run();

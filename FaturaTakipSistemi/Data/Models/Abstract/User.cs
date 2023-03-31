@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FaturaTakip.Data.Models.Abstract;
 
-public abstract class User
+public abstract class User : IEntity
 {
     public int Id { get; set; }
     [StringLength(50)]

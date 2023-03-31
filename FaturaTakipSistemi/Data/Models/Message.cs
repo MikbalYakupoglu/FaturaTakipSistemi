@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+﻿using FaturaTakip.Data.Models.Abstract;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FaturaTakip.Data.Models
 {
-    public class Message
+    public class Message : IEntity
     {
         public int Id { get; set; }
         public string Title { get; set; }

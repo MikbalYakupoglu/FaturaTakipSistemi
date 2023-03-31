@@ -14,16 +14,21 @@ using GovermentIdVerification;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
 using FaturaTakip.Business.Interface;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using AspNetCoreHero.ToastNotification.Abstractions;
 
 namespace FaturaTakip.Controllers
 {
     public class TenantsController : Controller
     {
         private readonly ITenantService _tenantService;
+        private readonly INotyfService _notyf;
 
-        public TenantsController(ITenantService tenantService)
+        public TenantsController(ITenantService tenantService,
+            INotyfService notyf)
         {
             _tenantService = tenantService;
+            _notyf = notyf;
         }
 
 
@@ -56,11 +61,11 @@ namespace FaturaTakip.Controllers
         }
 
         // GET: Tenants/Create
-        [Authorize(Roles = "admin,moderator")]
-        public IActionResult Create()
-        {
-            return View();
-        }
+        //[Authorize(Roles = "admin,moderator")]
+        //public IActionResult Create()
+        //{
+        //    return View();
+        //}
 
         //// POST: Tenants/Create
         //// To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -178,7 +183,11 @@ namespace FaturaTakip.Controllers
             var tenant = await _tenantService.GetTenantByIdAsync(id);
             if (tenant.Success)
             {
-                await _tenantService.RemoveTenantAsync(tenant.Data);
+                var result = await _tenantService.RemoveTenantAsync(tenant.Data);
+                if(!result.Success)
+                {
+                    _notyf.Error(result.Message);
+                }
             }
             
             return RedirectToAction(nameof(Index));
