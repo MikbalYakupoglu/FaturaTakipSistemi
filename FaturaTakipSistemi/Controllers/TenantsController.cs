@@ -16,6 +16,7 @@ using System.Data;
 using FaturaTakip.Business.Interface;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using AspNetCoreHero.ToastNotification.Abstractions;
+using Microsoft.AspNetCore.Identity;
 
 namespace FaturaTakip.Controllers
 {
@@ -24,11 +25,15 @@ namespace FaturaTakip.Controllers
         private readonly ITenantService _tenantService;
         private readonly INotyfService _notyf;
 
+        private readonly UserManager<InvoiceTrackUser> _userManager;
+
         public TenantsController(ITenantService tenantService,
-            INotyfService notyf)
+            INotyfService notyf,
+            UserManager<InvoiceTrackUser> userManager)
         {
             _tenantService = tenantService;
             _notyf = notyf;
+            _userManager = userManager;
         }
 
 
@@ -37,7 +42,7 @@ namespace FaturaTakip.Controllers
         [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Index()
         {
-            var tenants = await _tenantService.GetAllTenants();
+            var tenants = await _tenantService.GetAllTenantsAsync();
             return View(tenants.Data);
         }
 
@@ -45,7 +50,7 @@ namespace FaturaTakip.Controllers
         [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || !await _tenantService.IsAnyTenantExistAsync())
+            if (id == null || !_tenantService.IsAnyTenantExist())
             {
                 return NotFound();
             }
@@ -96,7 +101,7 @@ namespace FaturaTakip.Controllers
         [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || !await _tenantService.IsAnyTenantExistAsync())
+            if (id == null || !_tenantService.IsAnyTenantExist())
             {
                 return NotFound();
             }
@@ -155,7 +160,7 @@ namespace FaturaTakip.Controllers
         [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || !await _tenantService.IsAnyTenantExistAsync())
+            if (id == null || ! _tenantService.IsAnyTenantExist())
             {
                 return NotFound();
             }
@@ -175,7 +180,7 @@ namespace FaturaTakip.Controllers
         [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (!await _tenantService.IsAnyTenantExistAsync())
+            if (!_tenantService.IsAnyTenantExist())
             {
                 return Problem("Entity set 'InvoiceTrackContext.Tenants'  is null.");
             }
@@ -183,10 +188,15 @@ namespace FaturaTakip.Controllers
             var tenant = await _tenantService.GetTenantByIdAsync(id);
             if (tenant.Success)
             {
-                var result = await _tenantService.RemoveTenantAsync(tenant.Data);
+                var result = await _tenantService.DeleteTenantAsync(tenant.Data);
                 if(!result.Success)
                 {
                     _notyf.Error(result.Message);
+                }
+                else
+                {
+                    _notyf.Success("Başarıyla Silindi.");
+                    await _userManager.DeleteAsync(await _userManager.FindByIdAsync(tenant.Data.FK_UserId));
                 }
             }
             

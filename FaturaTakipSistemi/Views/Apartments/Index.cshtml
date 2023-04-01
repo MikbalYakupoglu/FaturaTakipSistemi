@@ -41,6 +41,9 @@
                 @Html.DisplayNameFor(model => model.Landlord)
             </th>
             <th>
+                @Html.DisplayNameFor(model => model.Landlord.LastName)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.RentPrice)
             </th>
             <th>
@@ -68,7 +71,10 @@
                     @Html.DisplayFor(modelItem => item.Block)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.FKLandlordId)
+                    @Html.DisplayFor(modelItem => item.Landlord.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Landlord.LastName)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.RentPrice)

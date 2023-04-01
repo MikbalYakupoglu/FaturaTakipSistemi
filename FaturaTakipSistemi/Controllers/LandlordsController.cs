@@ -1,6 +1,9 @@
-﻿using FaturaTakip.Data;
+﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using FaturaTakip.Business.Interface;
+using FaturaTakip.Data;
 using FaturaTakip.Data.Models;
 using FaturaTakip.Utils;
+using FaturaTakip.Utils.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,86 +18,100 @@ namespace FaturaTakip.Controllers
     {
         private readonly InvoiceTrackContext _context;
         private readonly UserManager<InvoiceTrackUser> _userManager;
+        private readonly ILandlordService _landlordService;
+        private readonly ITenantService _tenantService;
+        private readonly INotyfService _notyf;
 
 
         public LandlordsController(InvoiceTrackContext context,
-            UserManager<InvoiceTrackUser> userManager)
+            UserManager<InvoiceTrackUser> userManager,
+            ILandlordService landlordService,
+            ITenantService tenantService,
+            INotyfService notyf)
         {
             _context = context;
             _userManager = userManager;
+            _landlordService = landlordService;
+            _tenantService = tenantService;
+            _notyf = notyf;
         }
 
         #region Landlord
         [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Landlords.ToListAsync());
+            var landlords = await _landlordService.GetAllLandlordsAsync();
+            return View(landlords.Data);
         }
 
         // GET: Landlords/Details/5
         [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Landlords == null)
+            if (id == null || !_landlordService.IsAnyLandlordExist())
             {
                 return NotFound();
             }
 
-            var landlord = await _context.Landlords
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (landlord == null)
+            //var landlord = await _context.Landlords
+            //    .FirstOrDefaultAsync(m => m.Id == id);
+            var landlord = await _landlordService.GetLandlordByIdAsync(id);
+            if (!landlord.Success)
             {
                 return NotFound();
             }
 
-            return View(landlord);
+            return View(landlord.Data);
         }
 
         // GET: Landlords/Create
-        [Authorize(Roles = "admin,moderator")]
-        public IActionResult Create()
-        {
-            return View();
-        }
+
+        //[Authorize(Roles = "admin,moderator")]
+        //public IActionResult Create()
+        //{
+        //    return View();
+        //}
 
         // POST: Landlords/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "admin,moderator")]
-        public async Task<IActionResult> Create([Bind($"{nameof(Landlord.Id)},{nameof(Landlord.Name)},{nameof(Landlord.LastName)},{nameof(Landlord.GovermentId)}," +
-                                                      $"{nameof(Landlord.YearOfBirth)},{nameof(Landlord.Email)},{nameof(Landlord.Phone)}")] Landlord landlord)
-        {
-            if (ModelState.IsValid)
-            {
-                if (!MernisUtils.VerifyGovermentId(landlord.GovermentId, landlord.Name, landlord.LastName, landlord.YearOfBirth).Result)
-                {
-                    ViewData["VerificationError"] = "Girdiğiniz Bilgiler Yanlış, Lütfen kontrol ediniz.";
-                    return View(landlord);
-                }
-                _context.Add(landlord);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(landlord);
-        }
+
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //[Authorize(Roles = "admin,moderator")]
+        //public async Task<IActionResult> Create([Bind($"{nameof(Landlord.Id)},{nameof(Landlord.Name)},{nameof(Landlord.LastName)},{nameof(Landlord.GovermentId)}," +
+        //                                              $"{nameof(Landlord.YearOfBirth)},{nameof(Landlord.Email)},{nameof(Landlord.Phone)}")] Landlord landlord)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        if (!MernisUtils.VerifyGovermentId(landlord.GovermentId, landlord.Name, landlord.LastName, landlord.YearOfBirth).Result)
+        //        {
+        //            ViewData["VerificationError"] = "Girdiğiniz Bilgiler Yanlış, Lütfen kontrol ediniz.";
+        //            return View(landlord);
+        //        }
+        //        _context.Add(landlord);
+        //        await _context.SaveChangesAsync();
+        //        return RedirectToAction(nameof(Index));
+        //    }
+        //    return View(landlord);
+        //}
 
         // GET: Landlords/Edit/5
         [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Landlords == null)
+            if (id == null || !_landlordService.IsAnyLandlordExist())
             {
                 return NotFound();
             }
 
-            var landlord = await _context.Landlords.FindAsync(id);
-            if (landlord == null)
+            //var landlord = await _context.Landlords.FindAsync(id);
+            var landlord = await _landlordService.GetLandlordByIdAsync(id);
+            if (!landlord.Success)
             {
                 return NotFound();
             }
-            return View(landlord);
+            return View(landlord.Data);
         }
 
         // POST: Landlords/Edit/5
@@ -103,13 +120,17 @@ namespace FaturaTakip.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "admin,moderator")]
-        public async Task<IActionResult> Edit(int id, [Bind(include: $"{nameof(Landlord.Id)},{nameof(Landlord.Name)},{nameof(Landlord.LastName)},{nameof(Landlord.GovermentId)}," +
+        public async Task<IActionResult> Edit(int id, [Bind(include: $"{nameof(Landlord.Name)},{nameof(Landlord.LastName)},{nameof(Landlord.GovermentId)}," +
                                                             $"{nameof(Landlord.YearOfBirth)},{nameof(Landlord.Email)},{nameof(Landlord.Phone)}")] Landlord landlord)
         {
-            if (id != landlord.Id)
+            var landlordToEdit = await _landlordService.GetLandlordByIdAsync(id);
+            if (!landlordToEdit.Success)
             {
                 return NotFound();
             }
+
+            landlord.Id = landlordToEdit.Data.Id;
+            landlord.FK_UserId = landlordToEdit.Data.FK_UserId;
 
             if (ModelState.IsValid)
             {
@@ -120,8 +141,9 @@ namespace FaturaTakip.Controllers
                 //}
                 try
                 {
-                    _context.Update(landlord);
-                    await _context.SaveChangesAsync();
+                    //_context.Update(landlord);
+                    //await _context.SaveChangesAsync();
+                    await _landlordService.DeleteLandlordAsync(landlord);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -143,19 +165,20 @@ namespace FaturaTakip.Controllers
         [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Landlords == null)
+            if (id == null || !_landlordService.IsAnyLandlordExist())
             {
                 return NotFound();
             }
 
-            var landlord = await _context.Landlords
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (landlord == null)
+            //var landlord = await _context.Landlords
+            //    .FirstOrDefaultAsync(m => m.Id == id);
+            var landlord = await _landlordService.GetLandlordByIdAsync(id);
+            if (!landlord.Success)
             {
                 return NotFound();
             }
 
-            return View(landlord);
+            return View(landlord.Data);
         }
 
         // POST: Landlords/Delete/5
@@ -164,17 +187,26 @@ namespace FaturaTakip.Controllers
         [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Landlords == null)
+            if (!_landlordService.IsAnyLandlordExist())
             {
                 return Problem("Entity set 'InvoiceTrackContext.Landlords'  is null.");
             }
-            var landlord = await _context.Landlords.FindAsync(id);
-            if (landlord != null)
+            //var landlord = await _context.Landlords.FindAsync(id);
+            var landlord = await _landlordService.GetLandlordByIdAsync(id);
+            if (landlord.Success)
             {
-                _context.Landlords.Remove(landlord);
+                var result = await _landlordService.RemoveLandlordAsync(id);
+                if(!result.Success)
+                {
+                    _notyf.Error(result.Message);
+                }
+                else
+                {
+                    _notyf.Success("Başarıyla Silindi.");
+                    await _userManager.DeleteAsync(await _userManager.FindByIdAsync(landlord.Data.FK_UserId));
+                }
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
@@ -247,7 +279,7 @@ namespace FaturaTakip.Controllers
         [Route("landlords/manage/tenants/{tenantId}")]
         public async Task<IActionResult> GetSelectedTenant(int? tenantId)
         {
-            if (tenantId == null || _context.Tenants == null)
+            if (tenantId == null || !_tenantService.IsAnyTenantExist())
             {
                 return NotFound();
             }
@@ -277,9 +309,10 @@ namespace FaturaTakip.Controllers
         [HttpPost]
         public async Task<IActionResult> AddTenantIntoApartment([Bind("GovermentId")] Tenant tenant, [Bind("Id")] Apartment apartment)
         {
-            var tenantToAdd = await _context.Tenants.Where(t => t.GovermentId == tenant.GovermentId).FirstOrDefaultAsync();
+            //var tenantToAdd = await _context.Tenants.Where(t => t.GovermentId == tenant.GovermentId).FirstOrDefaultAsync();
+            var tenantToAdd = await _tenantService.GetTenantByGovermentId(tenant.GovermentId);
 
-            if (tenantToAdd == null)
+            if (!tenantToAdd.Success)
             {
                 ViewData["Hata"] = "TCNO ile Kiracı Bulunamadı";
                 SetViewBags();
@@ -294,7 +327,7 @@ namespace FaturaTakip.Controllers
             RentedApartment rentedApartment = new()
             {
                 FKApartmentId = apartment.Id,
-                FKTenantId = tenantToAdd.Id,
+                FKTenantId = tenantToAdd.Data.Id,
                 Status = true
             };
             _context.Apartments.First(a => a.Id == rentedApartment.FKApartmentId).Rented = true;
@@ -309,15 +342,16 @@ namespace FaturaTakip.Controllers
         [Route("landlords/manage/tenants/delete/{tenantId}")]
         public async Task<IActionResult> DeleteTenant(int? tenantId)
         {
-            if (tenantId == null || _context.Tenants == null)            
-                return NotFound();
-            
-            var tenant = await _context.Tenants.FirstOrDefaultAsync(t=> t.Id == tenantId);
-
-            if(tenant == null)
+            if (tenantId == null || !_tenantService.IsAnyTenantExist())            
                 return NotFound();
 
-            return View(tenant);
+            //var tenant = await _context.Tenants.FirstOrDefaultAsync(t=> t.Id == tenantId);
+            var tenant = await _tenantService.GetTenantByIdAsync(tenantId);
+
+            if(!tenant.Success)
+                return NotFound();
+
+            return View(tenant.Data);
         }
 
         #endregion

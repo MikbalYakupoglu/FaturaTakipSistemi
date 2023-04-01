@@ -8,22 +8,27 @@ using FaturaTakip.Data.Models;
 using FaturaTakip.Models;
 using System.Linq;
 using System.Diagnostics;
+using FaturaTakip.Business.Interface;
 
 namespace FaturaTakip.Controllers
 {
     public class ApartmentsController : Controller
     {
         private readonly InvoiceTrackContext _context;
+        private readonly IApartmentService _apartmentService;
 
-        public ApartmentsController(InvoiceTrackContext context)
+        public ApartmentsController(InvoiceTrackContext context,
+            IApartmentService apartmentService)
         {
             _context = context;  
+            _apartmentService = apartmentService;
         }
 
         // GET: Apartments
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Apartments.ToListAsync());
+            var apartments = await _apartmentService.GetAllApartmentsWithLandlordsAsync();
+            return View(apartments.Data);
         }
 
         // GET: Apartments/Details/5

@@ -12,6 +12,7 @@ using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
+using FaturaTakip.Business.Interface;
 
 namespace FaturaTakip.Areas.Admin.Pages.Manage
 {
@@ -22,16 +23,23 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ILogger<UserModel> _logger;
         private readonly InvoiceTrackContext _context;
+
+        private readonly ITenantService _tenantService;
+        private readonly ILandlordService _landlordService;
         public UserModel(
             UserManager<InvoiceTrackUser> userManager,
             ILogger<UserModel> logger,
             RoleManager<IdentityRole> roleManager,
-            InvoiceTrackContext context)
+            InvoiceTrackContext context,
+            ILandlordService landlordService,
+            ITenantService tenantService)
         {
             _userManager = userManager;
             _logger = logger;
             _roleManager = roleManager;
             _context = context;
+            _landlordService = landlordService;
+            _tenantService = tenantService;
         }
 
         [BindProperty]
@@ -166,19 +174,36 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
                 }
             }
 
-            var userToUpdate = GetSelectedUserFromTable(user.GovermentId);
-
-            if (Input.Name != user.Name)
+            var userToUpdate = await GetSelectedUserFromTable(user.GovermentId);
+            if (userToUpdate != null)
             {
-                user.Name = Input.Name;
-                userToUpdate.Name = Input.Name;
+                if (Input.Name != user.Name)
+                {
+                    user.Name = Input.Name;
+                    userToUpdate.Name = Input.Name;
+                }
+
+                if (Input.LastName != user.LastName)
+                {
+                    user.LastName = Input.LastName;
+                    userToUpdate.LastName = Input.LastName;
+                }
+            }
+            else
+            {
+                var invoiceTrackUserToUpdate = _context.Users.FirstOrDefault(u => u.GovermentId == user.GovermentId);
+                if (Input.Name != user.Name)
+                {
+                    invoiceTrackUserToUpdate.Name = Input.Name;
+                }
+                if (Input.LastName != user.LastName)
+                {
+                    invoiceTrackUserToUpdate.LastName = Input.LastName;
+                }
             }
 
-            if (Input.LastName != user.LastName)
-            {
-                user.LastName = Input.LastName;
-                userToUpdate.LastName = Input.LastName;
-            }
+
+
 
             var updateResult = await UpdateUserRoles(user);
             if (!updateResult)
@@ -201,15 +226,17 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
             return RedirectToPage();
         }
 
-        private User GetSelectedUserFromTable(string govermentId)
+        private async Task<User> GetSelectedUserFromTable(string govermentId)
         {
-            var landlord = _context.Landlords.FirstOrDefault(l => l.GovermentId == govermentId);
-            if (landlord != null)
-                return landlord;
+            //var landlord = _context.Landlords.FirstOrDefault(l => l.GovermentId == govermentId); // LandlordService
+            var landlord = await _landlordService.GetLandlordByGovermentId(govermentId);
+            if (landlord.Success)
+                return landlord.Data;
 
-            var tenant = _context.Tenants.FirstOrDefault(t => t.GovermentId == govermentId);
-            if (tenant != null)
-                return tenant;
+            //var tenant = _context.Tenants.FirstOrDefault(t => t.GovermentId == govermentId); // TenantService
+            var tenant = await _tenantService.GetTenantByGovermentId(govermentId);
+            if (tenant.Success)
+                return tenant.Data;
 
             return null;
         }

@@ -20,15 +20,23 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddSingleton<CommonLocalizationService>();
-builder.Services.AddSingleton<InvoiceTrackContext>();
 
 builder.Services.AddScoped<ITenantDal, EfTenantDal>();
+builder.Services.AddScoped<ILandlordDal, EfLandlordDal>();
+builder.Services.AddScoped<IApartmentDal, EfApartmentDal>();
+builder.Services.AddScoped<IRentedApartmentDal, EfRentedApartmentDal>();
+builder.Services.AddScoped<IDebtDal, EfDebtDal>();
+builder.Services.AddScoped<IMessageDal, EfMessageDal>();
+builder.Services.AddScoped<IPaymentDal, EfPaymentDal>();
 
 
 builder.Services.AddScoped<ITenantService, TenantManager>();
 builder.Services.AddScoped<ILandlordService, LandlordManager>();
+builder.Services.AddScoped<IApartmentService, ApartmentManager>();
 builder.Services.AddScoped<IRentedApartmentService, RentedApartmentManager>();
 
+
+builder.Services.AddDbContext<InvoiceTrackContext>();
 
 builder.Services.AddNotyf(config =>
 {

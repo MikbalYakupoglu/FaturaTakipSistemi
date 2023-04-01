@@ -260,7 +260,7 @@ namespace FaturaTakip.Controllers
         {
             var loginedUser = GetLoginedUser();
 
-            var landlord = await _landlordService.GetLandlordByUserIdAsync(loginedUser.Id);
+            var landlord = await _landlordService.GetLandlordByIdAsync(loginedUser.Id);
             if (landlord.Success)
                 return landlord.Data;
 

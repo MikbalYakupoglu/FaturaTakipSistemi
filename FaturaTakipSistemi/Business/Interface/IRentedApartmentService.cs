@@ -5,6 +5,8 @@ namespace FaturaTakip.Business.Interface
 {
     public interface IRentedApartmentService
     {
-        DataResult<IEnumerable<RentedApartment>> GetRentedApartmentsLandlords(int? id);
+        //DataResult<IEnumerable<RentedApartment>> GetRentedApartmentsLandlords(int? id);
+        Task<DataResult<RentedApartment>> GetRentedApartmentByTenantIdAsync(int? tenantId);
+
     }
 }

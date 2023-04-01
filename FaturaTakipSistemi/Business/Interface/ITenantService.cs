@@ -7,14 +7,15 @@ namespace FaturaTakip.Business.Interface
     {
         Task<DataResult<Tenant>> GetTenantByIdAsync(string  userId);
         Task<DataResult<Tenant>> GetTenantByIdAsync(int?  tenantId);
-        Task<DataResult<IEnumerable<Tenant>>> GetAllTenants();
+        Task<DataResult<Tenant>> GetTenantByGovermentId(string govermentId);
+        Task<DataResult<IEnumerable<Tenant>>> GetAllTenantsAsync();
         Task<bool> IsTenantExistAsync(int tenantId);
         Task<bool> IsTenantExistAsync(string userId);
         Task<bool> IsTenantRegisteredInHouseAsync(int tenantId);
         Task<bool> IsTenantRegisteredInHouseAsync(string userId);
         Task<Result> AddTenantAsync(Tenant tenant);
-        Task<Result> RemoveTenantAsync(Tenant tenant);  
+        Task<Result> DeleteTenantAsync(Tenant tenant);  
         Task<Result> UpdateTenantAsync(Tenant tenant);
-        Task<bool> IsAnyTenantExistAsync();
+        bool IsAnyTenantExist();
     }
 }
