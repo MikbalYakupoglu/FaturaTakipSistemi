@@ -1,6 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
 @using FaturaTakip.Utils
-@model IEnumerable<FaturaTakip.Data.Models.Apartment>
+@model IEnumerable<FaturaTakip.ViewModels.ApartmentVM>
 
 @{
     ViewData["Title"] = "Index";
@@ -23,7 +23,10 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Id)
+                @Html.DisplayNameFor(model => model.LandlordName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Block)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Floor)
@@ -33,15 +36,6 @@
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Type)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Block)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Landlord)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Landlord.LastName)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.RentPrice)
@@ -56,7 +50,10 @@
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Id)
+                    @Html.DisplayFor(modelItem => item.LandlordName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Block)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Floor)
@@ -66,15 +63,6 @@
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Type)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Block)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Landlord.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Landlord.LastName)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.RentPrice)

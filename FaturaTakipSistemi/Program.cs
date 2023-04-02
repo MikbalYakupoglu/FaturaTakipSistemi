@@ -46,6 +46,8 @@ builder.Services.AddNotyf(config =>
     config.HasRippleEffect = true;
 });
 
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
 //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 //builder.Services.AddDbContext<InvoiceTrackContext>(options =>
 //    options.UseSqlServer(connectionString));

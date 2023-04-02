@@ -51,5 +51,13 @@ namespace FaturaTakip.DataAccess.Core
                 return await context.Set<TEntity>().SingleOrDefaultAsync(filter);
             }
         }
+
+        public bool IsAnyExist()
+        {
+            using (TContext context = new TContext())
+            {
+                return context.Set<TEntity>().Any();
+            }
+        }
     }
 }

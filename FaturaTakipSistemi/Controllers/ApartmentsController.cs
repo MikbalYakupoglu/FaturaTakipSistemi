@@ -9,19 +9,24 @@ using FaturaTakip.Models;
 using System.Linq;
 using System.Diagnostics;
 using FaturaTakip.Business.Interface;
+using AspNetCoreHero.ToastNotification.Abstractions;
 
 namespace FaturaTakip.Controllers
 {
     public class ApartmentsController : Controller
     {
-        private readonly InvoiceTrackContext _context;
         private readonly IApartmentService _apartmentService;
+        private readonly ILandlordService _landlordService;
+        private readonly INotyfService _notyf;
 
         public ApartmentsController(InvoiceTrackContext context,
-            IApartmentService apartmentService)
-        {
-            _context = context;  
+            IApartmentService apartmentService,
+            ILandlordService landlordService,
+            INotyfService notyf)
+        { 
             _apartmentService = apartmentService;
+            _landlordService = landlordService;
+            _notyf = notyf;
         }
 
         // GET: Apartments
@@ -34,19 +39,18 @@ namespace FaturaTakip.Controllers
         // GET: Apartments/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Apartments == null)
+            if (id == null ||! _apartmentService.IsAnyApartmentExist())
             {
                 return NotFound();
             }
 
-            var apartment = await _context.Apartments
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (apartment == null)
+            var apartment = await _apartmentService.GetApartmentByIdWithLandlordAsync(id);
+            if (!apartment.Success)
             {
                 return NotFound();
             }
 
-            return View(apartment);
+            return View(apartment.Data);
         }
 
         // GET: Apartments/Create
@@ -61,28 +65,26 @@ namespace FaturaTakip.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Floor,DoorNumber,Type,Block,FKLandlordId,RentPrice,Rented")] Apartment apartment)
+        public async Task<IActionResult> Create([Bind("Id,FKLandlordId,Block,Floor,DoorNumber,Type,RentPrice,Rented")] Apartment apartment)
         {
             SetBlockAndTypeData();
-            var landlord = apartment.FKLandlordId;
-
-
-            var isExist = await _context.Apartments.AnyAsync(a => a.Block == apartment.Block && a.Floor == apartment.Floor && a.DoorNumber == apartment.DoorNumber);
-
-            if (isExist)
-            {
-                ViewData["Hata"] = "Apartman Zaten Bulunuyor.";
-                return View(apartment);
-            }
 
             if (ModelState.IsValid && apartment.Type != Type.None)
             {
-                _context.Add(apartment);
-                 await _context.SaveChangesAsync();
-                 return RedirectToAction(nameof(Index));
+                var result = await _apartmentService.AddApartmentAsync(apartment);
+                if (!result.Success)
+                {
+                    _notyf.Error(result.Message);
+                    return View(apartment);
+                }
+                else
+                {
+                    _notyf.Success(result.Message);
+                    return RedirectToAction(nameof(Index));
+                }
             }
             else
-                ViewData["Hata"] = "Apartman Bilgileri Boş Bırakılamaz.";
+                _notyf.Error(Messages.InputsCannotBeNull);
 
 
             return View(apartment);
@@ -91,18 +93,18 @@ namespace FaturaTakip.Controllers
         // GET: Apartments/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Apartments == null)
+            if (id == null ||! _apartmentService.IsAnyApartmentExist())
             {
                 return NotFound();
             }
 
-            var apartment = await _context.Apartments.FindAsync(id);
-            if (apartment == null)
+            var apartment = await _apartmentService.GetApartmentByIdAsync(id);
+            if (!apartment.Success)
             {
                 return NotFound();
             }
             SetBlockAndTypeData();
-            return View(apartment);
+            return View(apartment.Data);
         }
 
         // POST: Apartments/Edit/5
@@ -110,25 +112,34 @@ namespace FaturaTakip.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Floor,DoorNumber,Type,Block,FKLandlordId,RentPrice,Rented")] Apartment apartment)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,FKLandlordId,Block,Floor,DoorNumber,Type,RentPrice")] Apartment apartment)
         {
             SetBlockAndTypeData();
 
-            if (id != apartment.Id)
+            var apartmentToEdit = await _apartmentService.GetApartmentByIdAsync(id);
+
+            if (!apartmentToEdit.Success)
             {
                 return NotFound();
             }
 
+            apartment.Rented = apartmentToEdit.Data.Rented;
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(apartment);
-                    await _context.SaveChangesAsync();
+                    var result = await _apartmentService.UpdateApartmentAsync(apartment);
+                    if (result.Success)
+                        _notyf.Success(result.Message);
+                    else
+                    {
+                        _notyf.Error(result.Message);
+                        return View(apartment);
+                    }
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ApartmentExists(apartment.Id))
+                    if (!await _apartmentService.IsApartmentExistAsync(id))
                     {
                         return NotFound();
                     }
@@ -140,7 +151,7 @@ namespace FaturaTakip.Controllers
                 return RedirectToAction(nameof(Index));
             }
             else
-                ViewData["Hata"] = "Apartman Bilgileri Boş Bırakılamaz.";
+                _notyf.Error(Messages.InputsCannotBeNull);
 
             return View(apartment);
         }
@@ -148,19 +159,19 @@ namespace FaturaTakip.Controllers
         // GET: Apartments/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Apartments == null)
+            if (id == null ||! _apartmentService.IsAnyApartmentExist())
             {
                 return NotFound();
             }
 
-            var apartment = await _context.Apartments
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (apartment == null)
+            var apartment = await _apartmentService.GetApartmentByIdWithLandlordAsync(id);
+
+            if (!apartment.Success)
             {
                 return NotFound();
             }
 
-            return View(apartment);
+            return View(apartment.Data);
         }
 
         // POST: Apartments/Delete/5
@@ -168,23 +179,22 @@ namespace FaturaTakip.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Apartments == null)
+            if (! _apartmentService.IsAnyApartmentExist())
             {
                 return Problem("Entity set 'InvoiceTrackContext.Apartments'  is null.");
             }
-            var apartment = await _context.Apartments.FindAsync(id);
-            if (apartment != null)
+            var apartment = await _apartmentService.GetApartmentByIdAsync(id);
+
+            if (apartment.Success)
             {
-                _context.Apartments.Remove(apartment);
+                var result = await _apartmentService.RemoveApartmentAsync(id);
+                if (result.Success)
+                    _notyf.Success(result.Message);
+                else
+                    _notyf.Error(result.Message);
             }
             
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool ApartmentExists(int id)
-        {
-          return _context.Apartments.Any(e => e.Id == id);
         }
 
         private void SetBlockAndTypeData()
@@ -214,7 +224,8 @@ namespace FaturaTakip.Controllers
             ViewData["Blocks"] = new SelectList(blockList);
 
 
-            var landlords = _context.Landlords.ToListAsync().Result;
+            //var landlords = _context.Landlords.ToListAsync().Result;
+            var landlords = _landlordService.GetAllLandlordsAsync().Result.Data;
             Dictionary<int, string> landlordInfo = new Dictionary<int, string>();
 
             foreach (var landlord in landlords)

@@ -13,8 +13,8 @@ namespace FaturaTakip.Business.Interface
         Task<bool> IsLandlordRegisteredInHouseAsync(int landlordId);
         Task<bool> IsLandlordRegisteredInHouseAsync(string userId);
         Task<Result> AddLandlordAsync(Landlord landlord);
-        Task<Result> DeleteLandlordAsync(Landlord landlord);
         Task<Result> RemoveLandlordAsync(int landlordId);
+        Task<Result> UpdateLandlordAsync(Landlord landlord);
         Task<DataResult<IEnumerable<Landlord>>> GetAllLandlordsAsync();
         bool IsAnyLandlordExist();
 

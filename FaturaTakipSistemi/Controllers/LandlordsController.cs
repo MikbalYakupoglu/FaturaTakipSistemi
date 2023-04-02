@@ -20,6 +20,7 @@ namespace FaturaTakip.Controllers
         private readonly UserManager<InvoiceTrackUser> _userManager;
         private readonly ILandlordService _landlordService;
         private readonly ITenantService _tenantService;
+        private readonly IApartmentService _apartmentService;
         private readonly INotyfService _notyf;
 
 
@@ -27,12 +28,14 @@ namespace FaturaTakip.Controllers
             UserManager<InvoiceTrackUser> userManager,
             ILandlordService landlordService,
             ITenantService tenantService,
+            IApartmentService apartmentService,
             INotyfService notyf)
         {
             _context = context;
             _userManager = userManager;
             _landlordService = landlordService;
             _tenantService = tenantService;
+            _apartmentService = apartmentService;
             _notyf = notyf;
         }
 
@@ -143,7 +146,7 @@ namespace FaturaTakip.Controllers
                 {
                     //_context.Update(landlord);
                     //await _context.SaveChangesAsync();
-                    await _landlordService.DeleteLandlordAsync(landlord);
+                    await _landlordService.UpdateLandlordAsync(landlord);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -371,16 +374,17 @@ namespace FaturaTakip.Controllers
         private void SetViewBags()
         {
             var loginedLandlordId = GetLoginedLandlordId();
-            var landlordsApartments = _context.Apartments.Where(a => a.FKLandlordId == loginedLandlordId);
-            var landlordsUnrentedApartments = landlordsApartments.Except(_context.RentedApartments.Select(ra => ra.Apartment));
-
-            Dictionary<int, string> apartmentDetails = new();
-            foreach (var apartment in landlordsUnrentedApartments)
+            var landlordsUntenantedApartments = _apartmentService.GetLandlordsUntenantedApartmentsAsync(loginedLandlordId).Result;
+            if(landlordsUntenantedApartments.Success)
             {
-                apartmentDetails[apartment.Id] = "Block : " + apartment.Block + " - Floor : " + apartment.Floor + " - Door Number : " + apartment.DoorNumber;
-            }
+                Dictionary<int, string> apartmentDetails = new();
+                foreach (var apartment in landlordsUntenantedApartments.Data)
+                {
+                    apartmentDetails[apartment.Id] = "Block : " + apartment.Block + " - Floor : " + apartment.Floor + " - Door Number : " + apartment.DoorNumber;
+                }
 
-            ViewData["ApartmentDetails"] = new SelectList((IEnumerable)apartmentDetails, "Key", "Value");
+                ViewData["ApartmentDetails"] = new SelectList(apartmentDetails, "Key", "Value");
+            }
         }
 
         public int GetLoginedLandlordId()

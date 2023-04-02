@@ -34,18 +34,18 @@ namespace FaturaTakip.Business.Concrete
         {
             var landlordToDelete = await _landlordDal.GetAsync(l=> l.Id == landlordId);
 
-            if (!IsLandlordExistAsync(landlordToDelete.Id).Result)
+            if (!await IsLandlordExistAsync(landlordToDelete.Id))
                 return new ErrorResult("Ev Sahibi Bulunamadı.");
 
-            if (IsLandlordRegisteredInHouseAsync(landlordToDelete.Id).Result)
+            if (await IsLandlordRegisteredInHouseAsync(landlordToDelete.Id))
                 return new ErrorResult("Ev Sahibi Evde Oturuyor.");
 
             await _landlordDal.RemoveAsync(landlordToDelete);
 
-            return new SuccessResult("Ev Sahibi Silindi.");
+            return new SuccessResult();
         }
 
-        public async Task<Result> DeleteLandlordAsync(Landlord landlord)
+        public async Task<Result> UpdateLandlordAsync(Landlord landlord)
         {
             var landlordToUpdate = await _landlordDal.GetAsync(l=> l.Id == landlord.Id);
 
@@ -108,7 +108,7 @@ namespace FaturaTakip.Business.Concrete
 
         public async Task<bool> IsLandlordRegisteredInHouseAsync(int landlordId)
         {
-            var apartment = await _apartmentService.GetApartmentByLandlordIdAsync(landlordId);
+            var apartment = await _apartmentService.GetApartmentsByLandlordIdAsync(landlordId);
             return apartment.Success;
         }
 

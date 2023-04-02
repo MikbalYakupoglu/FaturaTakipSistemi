@@ -63,6 +63,7 @@ namespace FaturaTakip.Controllers
 
             ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id");
             ViewData["FKTenantId"] = new SelectList(_context.Tenants, "Id", "Id");
+            ViewData["FKLandlordId"] = new SelectList(_context.Landlords, "Id", "Id");
             return View();
         }
 
@@ -72,7 +73,7 @@ namespace FaturaTakip.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "admin,moderator")]
-        public async Task<IActionResult> Create([Bind("Id,Status,FKTenantId,FKApartmentId,FKLandlordId")] RentedApartment rentedApartment)
+        public async Task<IActionResult> Create([Bind("Id,Status,FKTenantId,FKApartmentId")] RentedApartment rentedApartment)
         {
             if (ModelState.IsValid)
             {
@@ -82,6 +83,7 @@ namespace FaturaTakip.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id", rentedApartment.FKApartmentId);
+            ViewData["FKLandlordId"] = new SelectList(_context.Landlords, "Id", "Id");
             ViewData["FKTenantId"] = new SelectList(_context.Tenants, "Id", "Id", rentedApartment.FKTenantId);
             return View(rentedApartment);
         }
@@ -95,7 +97,10 @@ namespace FaturaTakip.Controllers
                 return NotFound();
             }
 
-            var rentedApartment = await _context.RentedApartments.FindAsync(id);
+            var rentedApartment = await _context.RentedApartments
+                .Include(ra => ra.Apartment)
+                .FirstOrDefaultAsync(ra => ra.Id == id);
+
             if (rentedApartment == null)
             {
                 return NotFound();
@@ -103,6 +108,7 @@ namespace FaturaTakip.Controllers
 
 
             ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id", rentedApartment.FKApartmentId);
+            ViewData["FKLandlordId"] = new SelectList(_context.Landlords, "Id", "Id");
             ViewData["FKTenantId"] = new SelectList(_context.Tenants, "Id", "Id", rentedApartment.FKTenantId);
             return View(rentedApartment);
         }
@@ -115,10 +121,14 @@ namespace FaturaTakip.Controllers
         [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Status,FKTenantId,FKApartmentId,FKLandlordId")] RentedApartment rentedApartment)
         {
+            var rentedApartmentToEdit = await _context.RentedApartments.Include(ra=> ra.Apartment).FirstOrDefaultAsync(ra => ra.Id == id);
+
             if (id != rentedApartment.Id)
             {
                 return NotFound();
             }
+
+            rentedApartment.Apartment = rentedApartmentToEdit.Apartment;
 
             if (ModelState.IsValid)
             {
@@ -142,7 +152,8 @@ namespace FaturaTakip.Controllers
             }
 
 
-            ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id", rentedApartment.FKApartmentId);
+            //ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id", rentedApartment.FKApartmentId);
+            ViewData["FKLandlordId"] = new SelectList(_context.Landlords, "Id", "Id");
             ViewData["FKTenantId"] = new SelectList(_context.Tenants, "Id", "Id", rentedApartment.FKTenantId);
             return View(rentedApartment);
         }
@@ -182,6 +193,8 @@ namespace FaturaTakip.Controllers
             var rentedApartment = await _context.RentedApartments.FindAsync(id);
             if (rentedApartment != null)
             {
+                _context.RentedApartments.Include(ra => ra.Apartment)
+                    .FirstOrDefault(ra => ra.Id == id).Apartment.Rented = false;
                 _context.RentedApartments.Remove(rentedApartment);
             }
             

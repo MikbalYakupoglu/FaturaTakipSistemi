@@ -97,7 +97,7 @@ namespace FaturaTakip.Business.Concrete
                 return new ErrorResult("Kiracı Evde Oturuyor.");
 
             await _tenantDal.RemoveAsync(tenantToDelete);
-            return new SuccessResult("Kiracı Silindi.");
+            return new SuccessResult();
 
         }
 

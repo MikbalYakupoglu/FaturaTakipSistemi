@@ -1,5 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
-@model FaturaTakip.Data.Models.Apartment
+@model FaturaTakip.ViewModels.ApartmentVM;
 
 @{
     ViewData["Title"] = "Details";
@@ -12,10 +12,16 @@
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Id)
+            @Html.DisplayNameFor(model => model.LandlordName)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Id)
+            @Html.DisplayFor(model => model.LandlordName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Block)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Block)
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Floor)
@@ -34,18 +40,6 @@
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Type)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Block)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Block)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.FKLandlordId)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.FKLandlordId)
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.RentPrice)

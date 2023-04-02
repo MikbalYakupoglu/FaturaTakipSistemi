@@ -8,5 +8,6 @@ namespace FaturaTakip.DataAccess.Abstract
     public interface IApartmentDal : IEntityRepository<Apartment>
     {
         Task<DataResult<IEnumerable<Apartment>>> GetAllApartmentsWithLandlordsAsync();
+        Task<DataResult<Apartment>> GetApartmentByIdWithLandlordAsync(int? id);
     }
 }

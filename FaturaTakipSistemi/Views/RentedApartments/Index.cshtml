@@ -13,16 +13,16 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Status)
+                @Html.DisplayNameFor(model => model.Apartment)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Apartment.Landlord)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Tenant)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Apartment)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Apartment.Landlord)
+                @Html.DisplayNameFor(model => model.Status)
             </th>
             <th></th>
         </tr>
@@ -32,16 +32,17 @@
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Status)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Tenant.Id)
-                </td>
-                <td>
                     @Html.DisplayFor(modelItem => item.Apartment.Id)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Apartment.Landlord.Id)
+                </td>
+
+                <td>
+                    @Html.DisplayFor(modelItem => item.Tenant.Id)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Status)
                 </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |

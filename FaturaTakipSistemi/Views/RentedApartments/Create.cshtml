@@ -18,17 +18,18 @@
                 </label>
             </div>
             <div class="form-group">
+                <label asp-for="FKApartmentId" class="control-label"></label>
+                <select asp-for="FKApartmentId" class="form-control" asp-items="ViewBag.FKApartmentId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="Apartment.FKLandlordId" class="control-label"></label>
+                <select asp-for="Apartment.FKLandlordId" class="form-control" asp-items="ViewBag.FKLandlordId"></select>
+            </div>
+            <div class="form-group">
                 <label asp-for="FKTenantId" class="control-label"></label>
                 <select asp-for="FKTenantId" class ="form-control" asp-items="ViewBag.FKTenantId"></select>
             </div>
-            <div class="form-group">
-                <label asp-for="FKApartmentId" class="control-label"></label>
-                <select asp-for="FKApartmentId" class ="form-control" asp-items="ViewBag.FKApartmentId"></select>
-            </div>
-@*            <div class="form-group">
-                <label asp-for="Apartment.FKLandlordId" class="control-label"></label>
-                <select asp-for="Apartment.FKLandlordId" class="form-control" asp-items="ViewBag.FKLandlordId"></select>
-            </div>*@
+
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
