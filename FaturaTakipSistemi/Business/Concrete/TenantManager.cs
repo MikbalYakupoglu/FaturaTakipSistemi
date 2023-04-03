@@ -1,8 +1,10 @@
-﻿using FaturaTakip.Business.Interface;
+﻿using AutoMapper;
+using FaturaTakip.Business.Interface;
 using FaturaTakip.Data;
 using FaturaTakip.Data.Models;
 using FaturaTakip.DataAccess.Abstract;
 using FaturaTakip.Utils.Results;
+using FaturaTakip.ViewModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace FaturaTakip.Business.Concrete
@@ -11,12 +13,14 @@ namespace FaturaTakip.Business.Concrete
     {
         private readonly ITenantDal _tenantDal;
         private readonly IRentedApartmentService _rentedApartmentService;
+        private readonly IMapper _mapper;
         public TenantManager(ITenantDal tenantDal,
-            IRentedApartmentService rentedApartmentService)
+            IRentedApartmentService rentedApartmentService,
+            IMapper mapper)
         {
             _tenantDal = tenantDal;
             _rentedApartmentService = rentedApartmentService;
-
+            _mapper = mapper;
         }
 
         public async Task<DataResult<IEnumerable<Tenant>>> GetAllTenantsAsync()
@@ -76,7 +80,7 @@ namespace FaturaTakip.Business.Concrete
             return await IsTenantRegisteredInHouseAsync(tenant.Data.Id);
 
         }
-        public async Task<Result> AddTenantAsync(Tenant tenant)
+        public async Task<Result> AddTenantAsync(Tenant tenantToAdd)
         {
             if (await IsTenantExistAsync(tenant.Id))
                 return new ErrorResult("Kiracı Bulunuyor.");
@@ -86,9 +90,9 @@ namespace FaturaTakip.Business.Concrete
         }
 
 
-        public async Task<Result> DeleteTenantAsync(Tenant tenant)
+        public async Task<Result> DeleteTenantAsync(int tenantId)
         {
-            var tenantToDelete = await _tenantDal.GetAsync(t => t.Id == tenant.Id);
+            var tenantToDelete = await _tenantDal.GetAsync(t => t.Id == tenantId);
 
             if (!IsTenantExistAsync(tenantToDelete.Id).Result)
                 return new ErrorResult("Kiracı Bulunamadı.");
@@ -128,6 +132,15 @@ namespace FaturaTakip.Business.Concrete
                 return new ErrorDataResult<Tenant>("Kiracı Bulunamadı.");
 
             return new SuccessDataResult<Tenant>(tenant);
+        }
+
+        public async Task<DataResult<IEnumerable<TenantSelectVM>>> GetTenantsViewDataAsync()
+        {
+            var tenantsResult = await GetAllTenantsAsync();
+            if (!tenantsResult.Success)
+                return new ErrorDataResult<IEnumerable<TenantSelectVM>>(tenantsResult.Message);
+
+            return new SuccessDataResult<IEnumerable<TenantSelectVM>>(_mapper.Map<IEnumerable<TenantSelectVM>>(tenantsResult.Data));
         }
     }
 }

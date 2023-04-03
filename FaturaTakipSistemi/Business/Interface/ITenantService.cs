@@ -1,5 +1,7 @@
 ﻿using FaturaTakip.Utils.Results;
 using FaturaTakip.Data.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using FaturaTakip.ViewModels;
 
 namespace FaturaTakip.Business.Interface
 {
@@ -13,9 +15,10 @@ namespace FaturaTakip.Business.Interface
         Task<bool> IsTenantExistAsync(string userId);
         Task<bool> IsTenantRegisteredInHouseAsync(int tenantId);
         Task<bool> IsTenantRegisteredInHouseAsync(string userId);
-        Task<Result> AddTenantAsync(Tenant tenant);
-        Task<Result> DeleteTenantAsync(Tenant tenant);  
+        Task<Result> AddTenantAsync(Tenant tenantToAdd);
+        Task<Result> DeleteTenantAsync(int tenantId);  
         Task<Result> UpdateTenantAsync(Tenant tenant);
         bool IsAnyTenantExist();
+        Task<DataResult<IEnumerable<TenantSelectVM>>> GetTenantsViewDataAsync();
     }
 }

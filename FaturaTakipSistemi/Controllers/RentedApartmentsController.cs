@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using FaturaTakip.Business.Interface;
+using FaturaTakip.Data;
+using FaturaTakip.Data.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using FaturaTakip.Data;
-using FaturaTakip.Data.Models;
-using FaturaTakip.Models;
-using Microsoft.AspNetCore.Authorization;
-using System.Data;
-using FaturaTakip.Business.Interface;
 
 namespace FaturaTakip.Controllers
 {
@@ -18,52 +12,58 @@ namespace FaturaTakip.Controllers
     {
         private readonly InvoiceTrackContext _context;
         private readonly IRentedApartmentService _rentedApartmentService;
+        private readonly IApartmentService _apartmentService;
+        private readonly ILandlordService _landlordService;
+        private readonly ITenantService _tenantService;
 
         public RentedApartmentsController(InvoiceTrackContext context,
-            IRentedApartmentService rentedApartmentService)
+            IRentedApartmentService rentedApartmentService,
+            IApartmentService apartmentService,
+            ILandlordService landlordService,
+            ITenantService tenantService)
         {
             _context = context;
             _rentedApartmentService = rentedApartmentService;
+            _apartmentService = apartmentService;
+            _landlordService = landlordService;
+            _tenantService = tenantService;
         }
 
         // GET: RentedApartments
         [Authorize(Roles = "admin,moderator,landlord")]
         public async Task<IActionResult> Index()
         {
-            var invoiceTrackContext = _context.RentedApartments.Include(r => r.Apartment).Include(r => r.Apartment.Landlord).Include(r => r.Tenant);
-            return View(await invoiceTrackContext.ToListAsync());
+            var rentedApartments = await _rentedApartmentService.GetAllRentedApartmentsWithApartmentsAndTenantsAsync();
+
+            if (!rentedApartments.Success)
+                return View();
+
+            return View(rentedApartments.Data);
         }
 
         // GET: RentedApartments/Details/5
         [Authorize(Roles = "admin,moderator,landlord")]
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.RentedApartments == null)
+            if (id == null || ! _rentedApartmentService.IsAnyRentedApartmentExist())
             {
                 return NotFound();
             }
 
-            var rentedApartment = await _context.RentedApartments
-                .Include(r => r.Apartment)
-                .Include(r => r.Apartment.Landlord)
-                .Include(r => r.Tenant)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (rentedApartment == null)
+            var rentedApartment = await _rentedApartmentService.GetRentedApartmentByIdWithApartmentAndTenantAsync(id);
+            if (!rentedApartment.Success)
             {
                 return NotFound();
             }
 
-            return View(rentedApartment);
+            return View(rentedApartment.Data);
         }
 
         // GET: RentedApartments/Create
         [Authorize(Roles = "admin,moderator")]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-
-            ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id");
-            ViewData["FKTenantId"] = new SelectList(_context.Tenants, "Id", "Id");
-            ViewData["FKLandlordId"] = new SelectList(_context.Landlords, "Id", "Id");
+            await SetApartmentAndLandlordAndTenantDataAsync();
             return View();
         }
 
@@ -82,9 +82,7 @@ namespace FaturaTakip.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id", rentedApartment.FKApartmentId);
-            ViewData["FKLandlordId"] = new SelectList(_context.Landlords, "Id", "Id");
-            ViewData["FKTenantId"] = new SelectList(_context.Tenants, "Id", "Id", rentedApartment.FKTenantId);
+            await SetApartmentAndLandlordAndTenantDataAsync();
             return View(rentedApartment);
         }
 
@@ -92,7 +90,7 @@ namespace FaturaTakip.Controllers
         [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.RentedApartments == null)
+            if (id == null || _rentedApartmentService.IsAnyRentedApartmentExist())
             {
                 return NotFound();
             }
@@ -107,9 +105,7 @@ namespace FaturaTakip.Controllers
             }
 
 
-            ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id", rentedApartment.FKApartmentId);
-            ViewData["FKLandlordId"] = new SelectList(_context.Landlords, "Id", "Id");
-            ViewData["FKTenantId"] = new SelectList(_context.Tenants, "Id", "Id", rentedApartment.FKTenantId);
+            await SetApartmentAndLandlordAndTenantDataAsync();
             return View(rentedApartment);
         }
 
@@ -151,10 +147,7 @@ namespace FaturaTakip.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-
-            //ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id", rentedApartment.FKApartmentId);
-            ViewData["FKLandlordId"] = new SelectList(_context.Landlords, "Id", "Id");
-            ViewData["FKTenantId"] = new SelectList(_context.Tenants, "Id", "Id", rentedApartment.FKTenantId);
+            await SetApartmentAndLandlordAndTenantDataAsync();
             return View(rentedApartment);
         }
 
@@ -162,7 +155,7 @@ namespace FaturaTakip.Controllers
         [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.RentedApartments == null)
+            if (id == null || _rentedApartmentService.IsAnyRentedApartmentExist())
             {
                 return NotFound();
             }
@@ -186,7 +179,7 @@ namespace FaturaTakip.Controllers
         [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.RentedApartments == null)
+            if (_rentedApartmentService.IsAnyRentedApartmentExist())
             {
                 return Problem("Entity set 'InvoiceTrackContext.RentedApartments'  is null.");
             }
@@ -208,7 +201,33 @@ namespace FaturaTakip.Controllers
         }
 
         #region Helpers
+        private async Task SetApartmentAndLandlordAndTenantDataAsync()
+        {
+            var apartments = await _apartmentService.GetAllApartmentsAsync();
+            Dictionary<int, string> apartmentsInfo = new Dictionary<int, string>();
+            foreach (var apartment in apartments.Data)
+            {
+                apartmentsInfo.Add(apartment.Id, String.Join(" - ", $"Block : {apartment.Block}", $"Floor : {apartment.Floor}", $"Door : {apartment.DoorNumber}"));
+            }
+            ViewData["FKApartmentId"] = new SelectList(apartmentsInfo.OrderBy(x => x.Key), "Key", "Value");
 
+            var tenants = await _tenantService.GetTenantsViewDataAsync();
+            Dictionary<int, string> tenantsInfo = new Dictionary<int, string>();
+            foreach (var tenant in tenants.Data)
+            {
+                tenantsInfo.Add(tenant.Id, tenant.GovermentIdAndName);
+            }
+            ViewData["FKTenantId"] = new SelectList(tenantsInfo.OrderBy(x=> x.Key), "Key", "Value");
+
+            var landlords = await _landlordService.GetLandlordsViewDataAsync();
+            Dictionary<int, string> landlordInfo = new Dictionary<int, string>();
+            foreach (var landlord in landlords.Data)
+            {
+                landlordInfo.Add(landlord.Id,landlord.GovermentIdAndName);
+            }
+
+            ViewData["FKLandlordId"] = new SelectList(landlordInfo.OrderBy(x=>x.Key), "Key", "Value");
+        }
         #endregion
     }
 }

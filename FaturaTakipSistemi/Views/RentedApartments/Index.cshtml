@@ -1,4 +1,4 @@
-﻿@model IEnumerable<FaturaTakip.Data.Models.RentedApartment>
+﻿@model IEnumerable<FaturaTakip.ViewModels.RentedApartmentVM>
 
 @{
     ViewData["Title"] = "Index";
@@ -13,13 +13,24 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Apartment)
+                @Html.DisplayNameFor(model => model.ApartmentInfo)
+@*                <div class="row" style="max-width : 60%">
+                    <div class="col-sm">
+                        Block
+                    </div>
+                    <div class="col-sm">
+                        Floor
+                    </div>
+                    <div class="col-sm">
+                        Door
+                    </div>
+                </div>*@
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Apartment.Landlord)
+                @Html.DisplayNameFor(model => model.TenantName)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Tenant)
+                @Html.DisplayNameFor(model => model.RentTime)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Status)
@@ -32,14 +43,14 @@
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Apartment.Id)
+                    @*@Html.DisplayFor(modelItem => item.ApartmentInfo)*@
+                    @item.ApartmentInfo
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Apartment.Landlord.Id)
+                    @Html.DisplayFor(modelItem => item.TenantName)
                 </td>
-
                 <td>
-                    @Html.DisplayFor(modelItem => item.Tenant.Id)
+                    @Html.DisplayFor(modelItem => item.RentTime)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Status)

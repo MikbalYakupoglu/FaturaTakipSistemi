@@ -188,7 +188,7 @@ namespace FaturaTakip.Controllers
             var tenant = await _tenantService.GetTenantByIdAsync(id);
             if (tenant.Success)
             {
-                var result = await _tenantService.DeleteTenantAsync(tenant.Data);
+                var result = await _tenantService.DeleteTenantAsync(tenant.Data.Id);
                 if(!result.Success)
                 {
                     _notyf.Error(result.Message);

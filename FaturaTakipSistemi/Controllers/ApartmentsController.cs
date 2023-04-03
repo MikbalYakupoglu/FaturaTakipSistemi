@@ -187,7 +187,7 @@ namespace FaturaTakip.Controllers
 
             if (apartment.Success)
             {
-                var result = await _apartmentService.RemoveApartmentAsync(id);
+                var result = await _apartmentService.DeleteApartmentAsync(id);
                 if (result.Success)
                     _notyf.Success(result.Message);
                 else

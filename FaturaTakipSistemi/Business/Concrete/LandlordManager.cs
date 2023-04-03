@@ -1,9 +1,12 @@
-﻿using FaturaTakip.Business.Interface;
+﻿using AutoMapper;
+using FaturaTakip.Business.Interface;
 using FaturaTakip.Data;
 using FaturaTakip.Data.Models;
 using FaturaTakip.DataAccess.Abstract;
 using FaturaTakip.Utils.Results;
+using FaturaTakip.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using System.Collections;
 
 namespace FaturaTakip.Business.Concrete
 {
@@ -11,26 +14,26 @@ namespace FaturaTakip.Business.Concrete
     {
         private readonly ILandlordDal _landlordDal;
         private readonly IApartmentService _apartmentService;
-        private readonly InvoiceTrackContext _context;
-        public LandlordManager(InvoiceTrackContext context,
-            ILandlordDal landlordDal,
-            IApartmentService apartmentService)
+        private readonly IMapper _mapper;
+        public LandlordManager(ILandlordDal landlordDal,
+            IApartmentService apartmentService,
+            IMapper mapper)
         {
-            _context = context;
             _landlordDal = landlordDal;
             _apartmentService = apartmentService;
+            _mapper = mapper;
         }
 
-        public async Task<Result> AddLandlordAsync(Landlord landlord)
+        public async Task<Result> AddLandlordAsync(Landlord landlordToAdd)
         {
-            if (await IsLandlordExistAsync(landlord.Id))
+            if (await IsLandlordExistAsync(landlordToAdd.Id))
                 return new ErrorResult("Ev Sahibi Zaten Kayıtlı.");
 
-            await _landlordDal.AddAsync(landlord);
+            await _landlordDal.AddAsync(landlordToAdd);
             return new SuccessResult();
         }
 
-        public async Task<Result> RemoveLandlordAsync(int landlordId)
+        public async Task<Result> DeleteLandlordAsync(int landlordId)
         {
             var landlordToDelete = await _landlordDal.GetAsync(l=> l.Id == landlordId);
 
@@ -125,6 +128,16 @@ namespace FaturaTakip.Business.Concrete
                 return new ErrorDataResult<Landlord>("Ev Sahibi Bulunamadı.");
 
             return new SuccessDataResult<Landlord>(landlord);
+        }
+
+        public async Task<DataResult<IEnumerable<LandlordSelectVM>>> GetLandlordsViewDataAsync()
+        {
+            var landlordsResult = await GetAllLandlordsAsync();
+
+            if (!landlordsResult.Success)
+                return new ErrorDataResult<IEnumerable<LandlordSelectVM>>(landlordsResult.Message);
+
+            return new SuccessDataResult<IEnumerable<LandlordSelectVM>>(_mapper.Map<IEnumerable<LandlordSelectVM>>(landlordsResult.Data));
         }
     }
 }

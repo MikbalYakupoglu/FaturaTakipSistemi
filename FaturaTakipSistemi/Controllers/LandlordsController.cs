@@ -198,7 +198,7 @@ namespace FaturaTakip.Controllers
             var landlord = await _landlordService.GetLandlordByIdAsync(id);
             if (landlord.Success)
             {
-                var result = await _landlordService.RemoveLandlordAsync(id);
+                var result = await _landlordService.DeleteLandlordAsync(id);
                 if(!result.Success)
                 {
                     _notyf.Error(result.Message);

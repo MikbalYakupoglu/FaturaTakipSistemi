@@ -83,7 +83,7 @@ namespace FaturaTakip.Business.Concrete
 
         }
 
-        public async Task<Result> RemoveApartmentAsync(int apartmentId)
+        public async Task<Result> DeleteApartmentAsync(int apartmentId)
         {
             var apartmentToDelete = await _apartmentDal.GetAsync(a => a.Id == apartmentId);
             if (apartmentToDelete == null)
@@ -142,6 +142,16 @@ namespace FaturaTakip.Business.Concrete
 
             return new SuccessDataResult<IEnumerable<Apartment>>(untenantedApartments);
 
+        }
+
+        public async Task<DataResult<IEnumerable<ApartmentVM>>> GetAllApartmentsAsync()
+        {
+            var apartments = await _apartmentDal.GetAllAsync();
+
+            if (!apartments.Any())
+                return new ErrorDataResult<IEnumerable<ApartmentVM>>("Ev Bulunamadı.");
+
+            return new SuccessDataResult<IEnumerable<ApartmentVM>>(_mapper.Map<IEnumerable<ApartmentVM>>(apartments));
         }
     }
 }
