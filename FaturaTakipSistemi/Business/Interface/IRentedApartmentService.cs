@@ -15,7 +15,7 @@ namespace FaturaTakip.Business.Interface
         Task<Result> AddRentedApartmentAsync(RentedApartment rentedApartmentToAdd);
         Task<Result> DeleteRentedApartmentAsync(int rentedApartmentId);
         Task<Result> UpdateRentedApartmentAsync(RentedApartment rentedApartment);
-
+        Task<DataResult<IEnumerable<RentedApartment>>> GetRentedApartmentsByLandlordId(int? landlordId);
 
     }
 }

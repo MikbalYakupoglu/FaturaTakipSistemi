@@ -4,6 +4,7 @@ using FaturaTakip.Business.Interface;
 using FaturaTakip.Data;
 using FaturaTakip.Data.Models;
 using FaturaTakip.DataAccess.Abstract;
+using FaturaTakip.DataAccess.Concrete;
 using FaturaTakip.Utils;
 using FaturaTakip.Utils.Results;
 using FaturaTakip.ViewModels;
@@ -150,6 +151,17 @@ namespace FaturaTakip.Business.Concrete
                 return new ErrorDataResult<RentedApartment>(Messages.RentedApartmentNotFound);
 
             return new SuccessDataResult<RentedApartment>((rentedApartment.Data));
+        }
+
+        public async Task<DataResult<IEnumerable<RentedApartment>>> GetRentedApartmentsByLandlordId(int? landlordId)
+        {
+                var rentedApartments = await _rentedApartmentDal.GetRentedApartmentsByLandlordId(landlordId);
+
+                if (!rentedApartments.Any())
+                    return new ErrorDataResult<IEnumerable<RentedApartment>>("Kiralanmış Ev Bulunamadı.");
+
+                return new SuccessDataResult<IEnumerable<RentedApartment>>(rentedApartments);
+            
         }
     }
 }

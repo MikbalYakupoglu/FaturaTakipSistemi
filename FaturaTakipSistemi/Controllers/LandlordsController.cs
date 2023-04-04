@@ -16,26 +16,26 @@ namespace FaturaTakip.Controllers
 {
     public class LandlordsController : Controller
     {
-        private readonly InvoiceTrackContext _context;
         private readonly UserManager<InvoiceTrackUser> _userManager;
         private readonly ILandlordService _landlordService;
         private readonly ITenantService _tenantService;
         private readonly IApartmentService _apartmentService;
+        private readonly IRentedApartmentService _rentedApartmentService;
         private readonly INotyfService _notyf;
 
 
-        public LandlordsController(InvoiceTrackContext context,
-            UserManager<InvoiceTrackUser> userManager,
+        public LandlordsController(UserManager<InvoiceTrackUser> userManager,
             ILandlordService landlordService,
             ITenantService tenantService,
             IApartmentService apartmentService,
+            IRentedApartmentService rentedApartmentService,
             INotyfService notyf)
         {
-            _context = context;
             _userManager = userManager;
             _landlordService = landlordService;
             _tenantService = tenantService;
             _apartmentService = apartmentService;
+            _rentedApartmentService = rentedApartmentService;
             _notyf = notyf;
         }
 
@@ -225,16 +225,11 @@ namespace FaturaTakip.Controllers
         [Route("landlords/manage/apartments")]
         public async Task<IActionResult> ListApartments()
         {
-            var landlordId = GetLoginedLandlordId();
+            var landlordId = await GetLoginedLandlordId();
+            var landlordsApartments = await _apartmentService.GetApartmentsByLandlordIdAsync(landlordId);
 
-
-            var landlordsApartments = await _context.Apartments.Where(a => a.Landlord.Id == landlordId)
-                .Include(a => a.Landlord)
-                .ToListAsync(); 
-
-            ViewData["Apartments"] = landlordsApartments;
-            
-            return View(landlordsApartments);
+            ViewData["Apartments"] = landlordsApartments.Data;            
+            return View(landlordsApartments.Data);
         }
 
         #endregion
@@ -267,36 +262,40 @@ namespace FaturaTakip.Controllers
         [Route("landlords/manage/tenants")]
         public async Task<IActionResult> ListTenants()
         {
-            var landlordId = GetLoginedLandlordId();
+            var landlordId = await GetLoginedLandlordId();
 
-            var landlordsRentedApartments =
-                await _context.RentedApartments.Where(ra => ra.Apartment.FKLandlordId == landlordId)
-                    .Include(ra => ra.Apartment)
-                    .Include(ra => ra.Tenant)
-                    .ToListAsync();
+            //var landlordsRentedApartments =
+            //    await _context.RentedApartments.Where(ra => ra.Apartment.FKLandlordId == landlordId)
+            //        .Include(ra => ra.Apartment)
+            //        .Include(ra => ra.Tenant)
+            //        .ToListAsync();
 
-            return View(landlordsRentedApartments);
+            var landlordsRentedApartments = await _rentedApartmentService.GetRentedApartmentsByLandlordId(landlordId);
+
+            return View(landlordsRentedApartments.Data);
         }
 
         [Authorize(Roles = "landlord,admin,moderator")]
-        [Route("landlords/manage/tenants/{tenantId}")]
-        public async Task<IActionResult> GetSelectedTenant(int? tenantId)
+        [Route("landlords/manage/apartments/{rentedApartmentId}")]
+        public async Task<IActionResult> GetSelectedRentedApartment(int? rentedApartmentId)
         {
-            if (tenantId == null || !_tenantService.IsAnyTenantExist())
+            if (rentedApartmentId == null || !_rentedApartmentService.IsAnyRentedApartmentExist())
             {
                 return NotFound();
             }
 
-            var rentedApartment = await _context.RentedApartments
-                .Include(ra => ra.Apartment)
-                .Include(ra => ra.Tenant)
-                .FirstOrDefaultAsync(ra => ra.FKTenantId == tenantId);
-            if (rentedApartment == null)
+            //var rentedApartment = await _context.RentedApartments
+            //    .Include(ra => ra.Apartment)
+            //    .Include(ra => ra.Tenant)
+            //    .FirstOrDefaultAsync(ra => ra.FKTenantId == tenantId);
+            var rentedApartment = await _rentedApartmentService.GetRentedApartmentByIdAsync(rentedApartmentId);
+
+            if (!rentedApartment.Success)
             {
                 return NotFound();
             }
 
-            return View(rentedApartment);
+            return View(rentedApartment.Data);
         }
 
         [Authorize(Roles = "landlord,admin,moderator")]
@@ -315,15 +314,15 @@ namespace FaturaTakip.Controllers
             //var tenantToAdd = await _context.Tenants.Where(t => t.GovermentId == tenant.GovermentId).FirstOrDefaultAsync();
             var tenantToAdd = await _tenantService.GetTenantByGovermentId(tenant.GovermentId);
 
+            RentedApartment model = new()
+            {
+                Apartment = apartment
+            };
+
             if (!tenantToAdd.Success)
             {
                 ViewData["Hata"] = "TCNO ile Kiracı Bulunamadı";
                 SetViewBags();
-
-                RentedApartment model = new()
-                {
-                    Apartment = apartment
-                };
                 return View(model);
             }
 
@@ -333,10 +332,17 @@ namespace FaturaTakip.Controllers
                 FKTenantId = tenantToAdd.Data.Id,
                 Status = true
             };
-            _context.Apartments.First(a => a.Id == rentedApartment.FKApartmentId).Rented = true;
 
-            _context.Add(rentedApartment);
-            await _context.SaveChangesAsync();
+            var result = await _rentedApartmentService.AddRentedApartmentAsync(rentedApartment);
+            if(result.Success)            
+                _notyf.Success(result.Message);
+            
+            else
+            {
+                _notyf.Error(result.Message);
+                return View(model);
+            }
+
             return RedirectToAction("ListTenants");
         }
 
@@ -368,12 +374,13 @@ namespace FaturaTakip.Controllers
 
         private bool LandlordExists(int id)
         {
-            return _context.Landlords.Any(e => e.Id == id);
+            //return _context.Landlords.Any(e => e.Id == id);
+            return _landlordService.IsAnyLandlordExist();
         }
 
         private void SetViewBags()
         {
-            var loginedLandlordId = GetLoginedLandlordId();
+            var loginedLandlordId = GetLoginedLandlordId().Result;
             var landlordsUntenantedApartments = _apartmentService.GetLandlordsUntenantedApartmentsAsync(loginedLandlordId).Result;
             if(landlordsUntenantedApartments.Success)
             {
@@ -387,17 +394,10 @@ namespace FaturaTakip.Controllers
             }
         }
 
-        public int GetLoginedLandlordId()
+        public async Task<int> GetLoginedLandlordId()
         {
-            var loginedUser = _userManager.GetUserId(HttpContext.User);
-            var landlordId = (from u in _context.Users
-                    join l in _context.Landlords
-                        on u.GovermentId equals l.GovermentId
-                    where u.Id == loginedUser
-                    select l.Id
-                ).FirstOrDefault();
-
-            return landlordId;
+            var loginedLandlord = await _landlordService.GetLoginedLandlord(HttpContext);
+            return loginedLandlord.Data.Id;
         }
         #endregion
     }

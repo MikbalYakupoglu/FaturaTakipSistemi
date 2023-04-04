@@ -54,7 +54,8 @@ namespace FaturaTakip.Business.Concrete
 
         public bool IsAnyTenantExist()
         {
-            return _tenantDal.GetAllAsync().Result.Any();
+            //return _tenantDal.GetAllAsync().Result.Any();
+            return _tenantDal.IsAnyExist();
         }
 
         public async Task<bool> IsTenantExistAsync(int tenantId)
@@ -142,5 +143,6 @@ namespace FaturaTakip.Business.Concrete
 
             return new SuccessDataResult<IEnumerable<TenantSelectVM>>(_mapper.Map<IEnumerable<TenantSelectVM>>(tenantsResult.Data));
         }
+
     }
 }

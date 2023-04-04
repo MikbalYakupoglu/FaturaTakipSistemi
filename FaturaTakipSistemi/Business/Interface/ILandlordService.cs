@@ -20,6 +20,7 @@ namespace FaturaTakip.Business.Interface
         Task<DataResult<IEnumerable<Landlord>>> GetAllLandlordsAsync();
         bool IsAnyLandlordExist();
         Task<DataResult<IEnumerable<LandlordSelectVM>>> GetLandlordsViewDataAsync();
+        Task<DataResult<Landlord>> GetLoginedLandlord(HttpContext httpContext);
 
     }
 }

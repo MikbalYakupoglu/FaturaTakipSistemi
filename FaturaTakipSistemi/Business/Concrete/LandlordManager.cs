@@ -3,6 +3,7 @@ using FaturaTakip.Business.Interface;
 using FaturaTakip.Data;
 using FaturaTakip.Data.Models;
 using FaturaTakip.DataAccess.Abstract;
+using FaturaTakip.Utils;
 using FaturaTakip.Utils.Results;
 using FaturaTakip.ViewModels;
 using Microsoft.EntityFrameworkCore;
@@ -41,7 +42,7 @@ namespace FaturaTakip.Business.Concrete
                 return new ErrorResult("Ev Sahibi Bulunamadı.");
 
             if (await IsLandlordRegisteredInHouseAsync(landlordToDelete.Id))
-                return new ErrorResult("Ev Sahibi Evde Oturuyor.");
+                return new ErrorResult("Ev Sahibi Eve Kayıtlı.");
 
             await _landlordDal.RemoveAsync(landlordToDelete);
 
@@ -138,6 +139,16 @@ namespace FaturaTakip.Business.Concrete
                 return new ErrorDataResult<IEnumerable<LandlordSelectVM>>(landlordsResult.Message);
 
             return new SuccessDataResult<IEnumerable<LandlordSelectVM>>(_mapper.Map<IEnumerable<LandlordSelectVM>>(landlordsResult.Data));
+        }
+
+        public async Task<DataResult<Landlord>> GetLoginedLandlord(HttpContext httpContext)
+        {
+            var loginedLandlord = await _landlordDal.GetLoginedLandlord(httpContext);
+
+            if (loginedLandlord == null)
+                return new ErrorDataResult<Landlord>("Giriş Yapmış Kullanıcı Bulunamadı.");
+
+            return new SuccessDataResult<Landlord>(loginedLandlord);
         }
     }
 }
