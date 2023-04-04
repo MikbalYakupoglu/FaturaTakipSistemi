@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using AutoMapper;
 using FaturaTakip.Business.Interface;
 using FaturaTakip.Data;
 using FaturaTakip.Data.Models;
@@ -14,17 +15,21 @@ namespace FaturaTakip.Business.Concrete
     {
         private readonly IMapper _mapper;
         private readonly IRentedApartmentDal _rentedApartmentDal;
+        private readonly IApartmentDal _apartmentDal;
+
 
         public RentedApartmentManager(IMapper mapper,
-            IRentedApartmentDal rentedApartmentDal)
+            IRentedApartmentDal rentedApartmentDal,
+            IApartmentDal apartmentDal)
         {
             _mapper = mapper;
             _rentedApartmentDal = rentedApartmentDal;
+            _apartmentDal = apartmentDal;
         }
 
 
 
-        public async Task<DataResult<IEnumerable<RentedApartmentVM>>> GetAllRentedApartmentsWithApartmentsAndTenantsAsync()
+        public async Task<DataResult<IEnumerable<RentedApartmentVM>>> GetAllRentedApartmentsAsync()
         {
             var rentedApartments = await _rentedApartmentDal.GetAllRentedApartmentsWithApartmentsAndTenantsAsync();
             if(!rentedApartments.Success)
@@ -33,7 +38,7 @@ namespace FaturaTakip.Business.Concrete
             return new SuccessDataResult<IEnumerable<RentedApartmentVM>>(_mapper.Map<IEnumerable<RentedApartmentVM>>(rentedApartments.Data));
         }
 
-        public async Task<DataResult<RentedApartmentVM>> GetRentedApartmentByIdWithApartmentAndTenantAsync(int? id)
+        public async Task<DataResult<RentedApartmentVM>> GetRentedApartmentVMByIdAsync(int? id)
         {
             var rentedApartment = await _rentedApartmentDal.GetRentedApartmentByIdWithApartmentAndTenantAsync(id);
 
@@ -76,22 +81,75 @@ namespace FaturaTakip.Business.Concrete
 
         public async Task<Result> AddRentedApartmentAsync(RentedApartment rentedApartmentToAdd)
         {
-            var apartment = await _rentedApartmentDal.GetAsync(ra => ra.Id == rentedApartmentToAdd.Id);
-
-            if (apartment != null)
+            var rentedApartment = await _rentedApartmentDal.GetAsync(ra => ra.Id == rentedApartmentToAdd.Id);
+            if (rentedApartment != null)
                 return new ErrorResult("Ev Zaten Kiralanmış Durumda.");
 
-            await _rentedApartmentDal.AddAsync(apartment);
+            if(rentedApartmentToAdd.Status)
+            {
+                var apartmentToRent = await _apartmentDal.GetAsync(a => a.Id == rentedApartmentToAdd.FKApartmentId);
+                apartmentToRent.Rented = true;
+                await _apartmentDal.UpdateAsync(apartmentToRent);
+            }
+
+            rentedApartmentToAdd.RentTime = DateTime.Now;
+            await _rentedApartmentDal.AddAsync(rentedApartmentToAdd);
             return new SuccessResult(Messages.AddSuccess);
         }
-        public Task<Result> DeleteRentedApartmentAsync(int rentedApartmentId)
+        public async Task<Result> DeleteRentedApartmentAsync(int rentedApartmentId)
         {
-            throw new NotImplementedException();
+            var rentedApartmentToDelete = await GetRentedApartmentByIdAsync(rentedApartmentId);
+
+            if (!rentedApartmentToDelete.Success)
+                return new ErrorResult(Messages.RentedApartmentNotFound);
+
+
+            if (rentedApartmentToDelete.Data.Status) // Şuan kiralanmış ev siliniyorsa, evin kiralanma durumu false olacak
+            {
+                var apartmentToRent = await _apartmentDal.GetAsync(a => a.Id == rentedApartmentToDelete.Data.FKApartmentId);
+                apartmentToRent.Rented = false;
+                await _apartmentDal.UpdateAsync(apartmentToRent);
+            }
+
+            await _rentedApartmentDal.RemoveAsync(rentedApartmentToDelete.Data);
+            return new SuccessResult(Messages.RemoveSuccess);
         }
 
-        public Task<Result> UpdateRentedApartmentAsync(RentedApartment rentedApartment)
+        public async Task<Result> UpdateRentedApartmentAsync(RentedApartment rentedApartment)
         {
-            throw new NotImplementedException();
+            var rentedApartmentToUpdate = await _rentedApartmentDal.GetAsync(ra => ra.Id == rentedApartment.Id);
+
+            if (rentedApartmentToUpdate == null)
+                return new ErrorResult(Messages.RentedApartmentNotFound);
+
+            rentedApartmentToUpdate.FKTenantId = rentedApartment.FKTenantId;
+            rentedApartmentToUpdate.Status = rentedApartment.Status;
+
+            if(rentedApartment.Status)
+            {
+                var apartmentToRent = await _apartmentDal.GetAsync(a => a.Id == rentedApartment.FKApartmentId);
+                apartmentToRent.Rented = true;
+                await _apartmentDal.UpdateAsync(apartmentToRent);
+            }
+            else
+            {
+                var apartmentToRent = await _apartmentDal.GetAsync(a => a.Id == rentedApartment.FKApartmentId);
+                apartmentToRent.Rented = false;
+                await _apartmentDal.UpdateAsync(apartmentToRent);
+            }
+
+            await _rentedApartmentDal.UpdateAsync(rentedApartmentToUpdate);
+            return new SuccessResult(Messages.UpdateSuccess);
+        }
+
+        public async Task<DataResult<RentedApartment>> GetRentedApartmentByIdAsync(int? id)
+        {
+            var rentedApartment = await _rentedApartmentDal.GetRentedApartmentByIdWithApartmentAndTenantAsync(id);
+
+            if (!rentedApartment.Success)
+                return new ErrorDataResult<RentedApartment>(Messages.RentedApartmentNotFound);
+
+            return new SuccessDataResult<RentedApartment>((rentedApartment.Data));
         }
     }
 }

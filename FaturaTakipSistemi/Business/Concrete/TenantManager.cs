@@ -82,10 +82,10 @@ namespace FaturaTakip.Business.Concrete
         }
         public async Task<Result> AddTenantAsync(Tenant tenantToAdd)
         {
-            if (await IsTenantExistAsync(tenant.Id))
+            if (await IsTenantExistAsync(tenantToAdd.Id))
                 return new ErrorResult("Kiracı Bulunuyor.");
 
-            await _tenantDal.AddAsync(tenant);
+            await _tenantDal.AddAsync(tenantToAdd);
             return new SuccessResult();
         }
 

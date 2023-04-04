@@ -24,10 +24,10 @@
                 <span asp-validation-for="FKApartmentId" class="text-danger"></span>
             </div>*@
             Apartment ID : @Model.Apartment.Id
-            <div class="form-group">
+@*            <div class="form-group">
                 <label asp-for="Apartment.FKLandlordId" class="control-label"></label>
                 <select asp-for="Apartment.FKLandlordId" class="form-control" asp-items="ViewBag.FKLandlordId"></select>
-            </div>
+            </div>*@
             <div class="form-group">
                 <label asp-for="FKTenantId" class="control-label"></label>
                 <select asp-for="FKTenantId" class="form-control" asp-items="ViewBag.FKTenantId"></select>

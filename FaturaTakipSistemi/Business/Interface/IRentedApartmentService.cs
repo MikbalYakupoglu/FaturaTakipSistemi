@@ -8,8 +8,9 @@ namespace FaturaTakip.Business.Interface
     {
         //DataResult<IEnumerable<RentedApartment>> GetRentedApartmentsLandlords(int? id);
         Task<DataResult<RentedApartment>> GetRentedApartmentByTenantIdAsync(int? tenantId);
-        Task<DataResult<IEnumerable<RentedApartmentVM>>> GetAllRentedApartmentsWithApartmentsAndTenantsAsync();
-        Task<DataResult<RentedApartmentVM>> GetRentedApartmentByIdWithApartmentAndTenantAsync(int? id);
+        Task<DataResult<IEnumerable<RentedApartmentVM>>> GetAllRentedApartmentsAsync();
+        Task<DataResult<RentedApartmentVM>> GetRentedApartmentVMByIdAsync(int? id);
+        Task<DataResult<RentedApartment>> GetRentedApartmentByIdAsync(int? id);
         bool IsAnyRentedApartmentExist();
         Task<Result> AddRentedApartmentAsync(RentedApartment rentedApartmentToAdd);
         Task<Result> DeleteRentedApartmentAsync(int rentedApartmentId);
