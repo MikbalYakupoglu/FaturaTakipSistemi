@@ -34,7 +34,7 @@ namespace FaturaTakip.Business.Concrete
         {
             var rentedApartments = await _rentedApartmentDal.GetAllRentedApartmentsWithApartmentsAndTenantsAsync();
             if(!rentedApartments.Success)
-                return new ErrorDataResult<IEnumerable<RentedApartmentVM>>(rentedApartments.Message);
+                return new ErrorDataResult<IEnumerable<RentedApartmentVM>>(Enumerable.Empty<RentedApartmentVM>() ,rentedApartments.Message);
 
             return new SuccessDataResult<IEnumerable<RentedApartmentVM>>(_mapper.Map<IEnumerable<RentedApartmentVM>>(rentedApartments.Data));
         }

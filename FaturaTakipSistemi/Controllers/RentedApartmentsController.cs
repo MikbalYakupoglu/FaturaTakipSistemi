@@ -40,8 +40,8 @@ namespace FaturaTakip.Controllers
         {
             var rentedApartments = await _rentedApartmentService.GetAllRentedApartmentsAsync();
 
-            if (!rentedApartments.Success)
-                return View();
+            //if (!rentedApartments.Success)
+            //    return View();
 
             return View(rentedApartments.Data);
         }

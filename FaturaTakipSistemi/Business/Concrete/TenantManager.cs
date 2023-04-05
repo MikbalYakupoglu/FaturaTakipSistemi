@@ -28,7 +28,7 @@ namespace FaturaTakip.Business.Concrete
             var tenants = await _tenantDal.GetAllAsync();
 
             if (!tenants.Any())
-                return new ErrorDataResult<IEnumerable<Tenant>>("Herhangi Kiracı Bulunamadı.");
+                return new ErrorDataResult<IEnumerable<Tenant>>(Enumerable.Empty<Tenant>(),"Herhangi Kiracı Bulunamadı.");
 
             return new SuccessDataResult<IEnumerable<Tenant>>(tenants);
         }

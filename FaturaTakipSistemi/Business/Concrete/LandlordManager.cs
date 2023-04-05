@@ -70,7 +70,7 @@ namespace FaturaTakip.Business.Concrete
         {
             var landlords = await _landlordDal.GetAllAsync();
             if(landlords == null)
-                return new ErrorDataResult<IEnumerable<Landlord>>("Ev Sahibi Bulunamadı.");
+                return new ErrorDataResult<IEnumerable<Landlord>>(Enumerable.Empty<Landlord>(),"Ev Sahibi Bulunamadı.");
 
             return new SuccessDataResult<IEnumerable<Landlord>>(landlords);
         }

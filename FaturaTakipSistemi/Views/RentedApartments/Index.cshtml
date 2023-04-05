@@ -44,10 +44,11 @@
             <tr>
                 <td>
                     @*@Html.DisplayFor(modelItem => item.ApartmentInfo)*@
-                    @item.ApartmentInfo
+                    <a asp-controller="Apartments" asp-action="Details" asp-route-id="@item.FKApartmentId">@item.ApartmentInfo</a>
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.TenantName)
+                    <a asp-controller="Tenants" asp-action="Details" asp-route-id="@item.FKTenantId">@item.TenantName</a>
+                    @*@Html.DisplayFor(modelItem => item.TenantName)*@
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.RentTime)

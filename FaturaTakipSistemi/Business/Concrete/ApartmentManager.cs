@@ -25,7 +25,7 @@ namespace FaturaTakip.Business.Concrete
         {
             var apartmentsResult = await _apartmentDal.GetAllApartmentsWithLandlordsAsync();
             if(!apartmentsResult.Success)
-                return new ErrorDataResult<IEnumerable<ApartmentVM>>(apartmentsResult.Message);
+                return new ErrorDataResult<IEnumerable<ApartmentVM>>(Enumerable.Empty<ApartmentVM>(),apartmentsResult.Message);
 
             return new SuccessDataResult<IEnumerable<ApartmentVM>>(_mapper.Map<IEnumerable<ApartmentVM>>(apartmentsResult.Data));
         }
@@ -137,6 +137,8 @@ namespace FaturaTakip.Business.Concrete
             var apartments = await _apartmentDal.GetAllAsync(a => a.FKLandlordId == landlordId);
             var untenantedApartments = apartments.Where(a=> a.Rented == false).ToList();
 
+
+
             if (!untenantedApartments.Any())
                 return new ErrorDataResult<IEnumerable<Apartment>>("Kiralanmamış Ev Bulunamadı.");
 
@@ -149,7 +151,7 @@ namespace FaturaTakip.Business.Concrete
             var apartments = await _apartmentDal.GetAllAsync();
 
             if (!apartments.Any())
-                return new ErrorDataResult<IEnumerable<ApartmentVM>>("Ev Bulunamadı.");
+                return new ErrorDataResult<IEnumerable<ApartmentVM>>(Enumerable.Empty<ApartmentVM>(),"Ev Bulunamadı.");
 
             return new SuccessDataResult<IEnumerable<ApartmentVM>>(_mapper.Map<IEnumerable<ApartmentVM>>(apartments));
         }

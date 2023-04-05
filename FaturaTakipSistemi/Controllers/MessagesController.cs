@@ -12,60 +12,56 @@ using Microsoft.AspNetCore.Identity;
 using FaturaTakip.Data.Models.Abstract;
 using Microsoft.AspNetCore.Authorization;
 using FaturaTakip.Business.Interface;
+using FaturaTakip.Business.Concrete;
+using AspNetCoreHero.ToastNotification.Abstractions;
 
 namespace FaturaTakip.Controllers
 {
     public class MessagesController : Controller
     {
-        private readonly InvoiceTrackContext _context;
         private readonly UserManager<InvoiceTrackUser> _userManager;
         private readonly ITenantService _tenantService;
         private readonly ILandlordService _landlordService;
+        private readonly IMessageService _messageService;
+        private readonly INotyfService _notyf;
 
-        public MessagesController(InvoiceTrackContext context,
-            UserManager<InvoiceTrackUser> userManager,
+        public MessagesController(UserManager<InvoiceTrackUser> userManager,
             ITenantService tenantService,
-            ILandlordService landlordService)
+            ILandlordService landlordService,
+            IMessageService messageService,
+            INotyfService notyf)
         {
-            _context = context;
             _userManager = userManager;
             _tenantService = tenantService;
             _landlordService = landlordService;
+            _messageService = messageService;
+            _notyf = notyf;
         }
 
         // GET: Messages
         [Authorize(Roles = "admin,moderator,landlord,tenant")]
         public async Task<IActionResult> Index()
         {
-            var loginedUser = GetLoginedUserWithType().Result;
-            var landlord = new Landlord();
-            var tenant = new Tenant();
-            if (loginedUser != null)
+            var loginedUser = await GetLoginedUser();
+            var loginedCustomUser = await GetLoginedUserWithType();
+
+            if (loginedCustomUser != null) // Landlord veya Tenant mı
             {
-                if (loginedUser.GetType() == landlord.GetType())
+                if (await _userManager.IsInRoleAsync(loginedUser, nameof(Landlord).ToLower()))
                 {
-                    var messages = _context.Messages
-                        .Include(m => m.Tenant)
-                        .Where(m => m.FKLandlordId == loginedUser.Id);
-                    return View(messages);
+                    var messages = await _messageService.GetMessagesByLandlordIdAsync(loginedCustomUser.Id);
+                    return View(messages.Data);
                 }
-
-
-                if (loginedUser.GetType() == tenant.GetType())
+                if (await _userManager.IsInRoleAsync(loginedUser, nameof(Tenant).ToLower()))
                 {
-                    var messages = _context.Messages
-                        .Include(m => m.Landlord)
-                        .Where(m => m.FKTenantId == loginedUser.Id);
-                    return View(messages);
+                    var messages = await _messageService.GetMessagesByTenantIdAsync(loginedCustomUser.Id);
+                    return View(messages.Data);
                 }
             }
-            else if (await _userManager.IsInRoleAsync(GetLoginedUser(), "admin") || (await _userManager.IsInRoleAsync(GetLoginedUser(), "moderator")))
+            else if (await _userManager.IsInRoleAsync(loginedUser, "admin") || (await _userManager.IsInRoleAsync(loginedUser, "moderator")))
             {
-                var messages = _context.Messages
-                    .Include(m => m.Landlord)
-                    .Include(m => m.Tenant);
-
-                return View(await messages.ToListAsync());
+                var messages = await _messageService.GetAllMessagesAsync();
+                return View(messages.Data);
             }
 
             return Unauthorized();
@@ -74,21 +70,22 @@ namespace FaturaTakip.Controllers
         [Authorize(Roles = "admin,moderator,landlord,tenant")]
         public async Task<IActionResult> View(int? id)
         {
-            if (id == null || _context.Messages == null)
+            if (id == null || !_messageService.IsAnyMessageExist())
             {
                 return NotFound();
             }
 
-            var message = await _context.Messages
-                .Include(m => m.Apartment)
-                .Include(m => m.Tenant)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (message == null)
+            //var message = await _context.Messages
+            //    .Include(m => m.Apartment)
+            //    .Include(m => m.Tenant)
+            //    .FirstOrDefaultAsync(m => m.Id == id);
+            var message = await _messageService.GetMessageByIdAsync(id);
+            if (!message.Success)
             {
                 return NotFound();
             }
 
-            return View(message);
+            return View(message.Data);
         }
 
 
@@ -96,35 +93,37 @@ namespace FaturaTakip.Controllers
         [Authorize(Roles = "admin,moderator,landlord,tenant")]
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Messages == null)
+            if (id == null || !_messageService.IsAnyMessageExist())
             {
                 return NotFound();
             }
 
-            var message = await _context.Messages
-                .Include(m => m.Landlord)
-                .Include(m => m.Tenant)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (message == null)
+            //var message = await _context.Messages
+            //    .Include(m => m.Landlord)
+            //    .Include(m => m.Tenant)
+            //    .FirstOrDefaultAsync(m => m.Id == id);
+            var message = await _messageService.GetMessageByIdAsync(id);
+            if (!message.Success)
             {
                 return NotFound();
             }
 
-            return View(message);
+            return View(message.Data);
         }
 
-        // GET: Messages/Create
+        //GET: Messages/Create
         [Authorize(Roles = "admin,moderator,landlord,tenant")]
-        public IActionResult Create()
+        public IActionResult Create() // LoginedUserin Tenantları Listelenecek
         {
             ViewData["FKLandlordId"] = new SelectList(_context.Landlords, "Id", "Id");
             ViewData["FKTenantId"] = new SelectList(_context.Tenants, "Id", "Id");
             return View();
         }
 
-        // POST: Messages/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        //POST: Messages/Create
+        //To protect from overposting attacks, enable the specific properties you want to bind to.
+        //For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Title,Body,FKTenantId,FKLandlordId,FkApartmentId")] Message message)
@@ -146,19 +145,22 @@ namespace FaturaTakip.Controllers
         [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Messages == null)
+            if (id == null || !_messageService.IsAnyMessageExist())
             {
                 return NotFound();
             }
 
-            var message = await _context.Messages.FindAsync(id);
-            if (message == null)
+            //var message = await _context.Messages.FindAsync(id);
+            var message = await _messageService.GetMessageByIdAsync(id);
+            if (!message.Success)
             {
                 return NotFound();
             }
-            ViewData["FKLandlordId"] = new SelectList(_context.Landlords, "Id", "Id", message.FKLandlordId);
-            ViewData["FKTenantId"] = new SelectList(_context.Tenants, "Id", "Id", message.FKTenantId);
-            return View(message);
+            var landlords = await _landlordService.GetAllLandlordsAsync();
+            var tenants = await _tenantService.GetAllTenantsAsync();
+            ViewData["FKLandlordId"] = new SelectList(landlords.Data, "Id", "Id", message.Data.FKLandlordId);
+            ViewData["FKTenantId"] = new SelectList(tenants.Data, "Id", "Id", message.Data.FKTenantId);
+            return View(message.Data);
         }
 
         // POST: Messages/Edit/5
@@ -167,19 +169,34 @@ namespace FaturaTakip.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "admin,moderator")]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Body,FKTenantId,FKLandlordId,FkApartmentId")] Message message)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Body")] Message message)
         {
-            if (id != message.Id)
+            var messageToEdit = await _messageService.GetMessageByIdAsync(message.Id);
+
+            if (!messageToEdit.Success)
             {
                 return NotFound();
             }
+
+            message.FKLandlordId = messageToEdit.Data.FKLandlordId;
+            message.FKTenantId = messageToEdit.Data.FKTenantId;
+            message.FKApartmentId = messageToEdit.Data.FKApartmentId;
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(message);
-                    await _context.SaveChangesAsync();
+                    //_context.Update(message);
+                    //await _context.SaveChangesAsync();
+                    var result = await _messageService.UpdateAsync(message);
+                    if (!result.Success)
+                    {
+                        _notyf.Error(result.Message);
+                        return View(message);
+                    }
+                    else
+                        _notyf.Success(result.Message);
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -194,8 +211,11 @@ namespace FaturaTakip.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["FKLandlordId"] = new SelectList(_context.Landlords, "Id", "Id", message.FKLandlordId);
-            ViewData["FKTenantId"] = new SelectList(_context.Tenants, "Id", "Id", message.FKTenantId);
+
+            var landlords = await _landlordService.GetAllLandlordsAsync();
+            var tenants = await _tenantService.GetAllTenantsAsync();
+            ViewData["FKLandlordId"] = new SelectList(landlords.Data, "Id", "Id", messageToEdit.Data.FKLandlordId);
+            ViewData["FKTenantId"] = new SelectList(tenants.Data, "Id", "Id", messageToEdit.Data.FKTenantId);
             return View(message);
         }
 
@@ -203,21 +223,22 @@ namespace FaturaTakip.Controllers
         [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Messages == null)
+            if (id == null || !_messageService.IsAnyMessageExist())
             {
                 return NotFound();
             }
 
-            var message = await _context.Messages
-                .Include(m => m.Landlord)
-                .Include(m => m.Tenant)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (message == null)
+            //var message = await _context.Messages
+            //    .Include(m => m.Landlord)
+            //    .Include(m => m.Tenant)
+            //    .FirstOrDefaultAsync(m => m.Id == id);
+            var message = await _messageService.GetMessageByIdAsync(id);
+            if (!message.Success)
             {
                 return NotFound();
             }
 
-            return View(message);
+            return View(message.Data);
         }
 
         // POST: Messages/Delete/5
@@ -226,39 +247,31 @@ namespace FaturaTakip.Controllers
         [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Messages == null)
+            if (!_messageService.IsAnyMessageExist())
             {
                 return Problem("Entity set 'InvoiceTrackContext.Messages'  is null.");
             }
-            var message = await _context.Messages.FindAsync(id);
-            if (message != null)
-            {
-                _context.Messages.Remove(message);
-            }
 
-            await _context.SaveChangesAsync();
+            var result = await _messageService.DeleteAsync(id);
+
+            if (result.Success)
+                _notyf.Success(result.Message);
+            else
+                _notyf.Error(result.Message);
+
             return RedirectToAction(nameof(Index));
         }
 
         private bool MessageExists(int id)
         {
-            return _context.Messages.Any(e => e.Id == id);
+            var message = _messageService.GetMessageByIdAsync(id).Result;
+            return message.Success;
         }
 
         #region Helpers
-        private InvoiceTrackUser GetLoginedUser()
-        {
-            var loginedUserId = _userManager.GetUserId(HttpContext.User);
-            if (loginedUserId == null)
-                return null;
-
-            var loginedUser = _context.Users.First(u => u.Id == loginedUserId);
-
-            return loginedUser;
-        }
         private async Task<User> GetLoginedUserWithType()
         {
-            var loginedUser = GetLoginedUser();
+            var loginedUser = await _userManager.GetLoginedUserAsync(HttpContext);
 
             var landlord = await _landlordService.GetLandlordByIdAsync(loginedUser.Id);
             if (landlord.Success)

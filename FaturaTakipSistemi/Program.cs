@@ -34,6 +34,8 @@ builder.Services.AddScoped<ITenantService, TenantManager>();
 builder.Services.AddScoped<ILandlordService, LandlordManager>();
 builder.Services.AddScoped<IApartmentService, ApartmentManager>();
 builder.Services.AddScoped<IRentedApartmentService, RentedApartmentManager>();
+builder.Services.AddScoped<IMessageService, MessageManager>();
+
 
 
 builder.Services.AddDbContext<InvoiceTrackContext>();
