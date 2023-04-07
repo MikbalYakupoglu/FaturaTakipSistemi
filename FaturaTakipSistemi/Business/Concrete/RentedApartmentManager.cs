@@ -75,11 +75,6 @@ namespace FaturaTakip.Business.Concrete
         //    return new SuccessDataResult<IEnumerable<RentedApartment>>(rentedApartmentsLandlords.ToList());
         //}
 
-        public bool IsRentedApartmentExist(int tenantId)
-        {
-            return _rentedApartmentDal.GetAllAsync(ra=> ra.FKTenantId == tenantId).Result.Any();
-        }
-
         public async Task<Result> AddRentedApartmentAsync(RentedApartment rentedApartmentToAdd)
         {
             var rentedApartment = await _rentedApartmentDal.GetAsync(ra => ra.Id == rentedApartmentToAdd.Id);
@@ -162,6 +157,26 @@ namespace FaturaTakip.Business.Concrete
 
                 return new SuccessDataResult<IEnumerable<RentedApartment>>(rentedApartments);
             
+        }
+
+        public async Task<DataResult<IEnumerable<RentedApartment>>> GetTenantsRentedApartmentsByTenantIdAsync(int? tenantId)
+        {
+            var rentedApartments = await _rentedApartmentDal.GetTenantsRentedApartmentsByTenantId(tenantId);
+
+            if (!rentedApartments.Any())
+                return new ErrorDataResult<IEnumerable<RentedApartment>>("Kiralanmış Ev Bulunamadı.");
+
+            return new SuccessDataResult<IEnumerable<RentedApartment>>(rentedApartments);
+        }
+
+        public async Task<DataResult<RentedApartment>> GetRentedApartmentByApartmentIdAsync(int? apartmentId)
+        {
+            var rentedApartment = await _rentedApartmentDal.GetRentedApartmentByApartmentId(apartmentId);
+
+            if (rentedApartment == null)
+                return new ErrorDataResult<RentedApartment>("Kiralanmış Ev Bulunamadı.");
+
+            return new SuccessDataResult<RentedApartment>(rentedApartment);
         }
     }
 }

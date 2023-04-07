@@ -144,5 +144,14 @@ namespace FaturaTakip.Business.Concrete
             return new SuccessDataResult<IEnumerable<TenantSelectVM>>(_mapper.Map<IEnumerable<TenantSelectVM>>(tenantsResult.Data));
         }
 
+        public async Task<DataResult<IEnumerable<Tenant>>> GetTenantsByLandlordIdAsync(int landlordId)
+        {
+            var tenants = await _tenantDal.GetTenantsByLandlordIdAsync(landlordId);
+
+            if (!tenants.Any())
+                return new ErrorDataResult<IEnumerable<Tenant>>(Enumerable.Empty<Tenant>(),"Kiracı Bulunamadı.");
+
+            return new SuccessDataResult<IEnumerable<Tenant>>(tenants);
+        }
     }
 }

@@ -143,12 +143,22 @@ namespace FaturaTakip.Business.Concrete
 
         public async Task<DataResult<Landlord>> GetLoginedLandlord(HttpContext httpContext)
         {
-            var loginedLandlord = await _landlordDal.GetLoginedLandlord(httpContext);
+            var loginedLandlord = await _landlordDal.GetLoginedLandlordAsync(httpContext);
 
             if (loginedLandlord == null)
                 return new ErrorDataResult<Landlord>("Giriş Yapmış Kullanıcı Bulunamadı.");
 
             return new SuccessDataResult<Landlord>(loginedLandlord);
+        }
+
+        public async Task<DataResult<IEnumerable<Landlord>>> GetLandlordByTenantIdAsync(int tenantId)
+        {
+            var landlords = await _landlordDal.GetLandlordsByTenantIdAsync(tenantId);
+
+            if (!landlords.Any())
+                return new ErrorDataResult<IEnumerable<Landlord>>(Enumerable.Empty<Landlord>(),"Ev Sahibi Bulunamadı.");
+
+            return new SuccessDataResult<IEnumerable<Landlord>>(landlords);
         }
     }
 }

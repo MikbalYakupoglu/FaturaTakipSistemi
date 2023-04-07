@@ -7,6 +7,7 @@ namespace FaturaTakip.Business.Interface
     public interface IRentedApartmentService
     {
         //DataResult<IEnumerable<RentedApartment>> GetRentedApartmentsLandlords(int? id);
+        Task<DataResult<IEnumerable<RentedApartment>>> GetTenantsRentedApartmentsByTenantIdAsync(int? tenantId);
         Task<DataResult<RentedApartment>> GetRentedApartmentByTenantIdAsync(int? tenantId);
         Task<DataResult<IEnumerable<RentedApartmentVM>>> GetAllRentedApartmentsAsync();
         Task<DataResult<RentedApartmentVM>> GetRentedApartmentVMByIdAsync(int? id);
@@ -16,6 +17,7 @@ namespace FaturaTakip.Business.Interface
         Task<Result> DeleteRentedApartmentAsync(int rentedApartmentId);
         Task<Result> UpdateRentedApartmentAsync(RentedApartment rentedApartment);
         Task<DataResult<IEnumerable<RentedApartment>>> GetRentedApartmentsByLandlordId(int? landlordId);
+        Task<DataResult<RentedApartment>> GetRentedApartmentByApartmentIdAsync(int? apartmentId);
 
     }
 }

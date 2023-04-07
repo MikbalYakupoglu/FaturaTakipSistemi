@@ -11,7 +11,8 @@ namespace FaturaTakip.Data.Models
         public string Body { get; set; }
         public int? FKTenantId { get; set; }
         public int? FKLandlordId { get; set; }
-        public int? FKApartmentId { get; set; }
+        public int? FkApartmentId { get; set; }
+        public string? FKUserId { get; set; }
         public bool IsVisible { get; set; }
 
 
@@ -24,7 +25,11 @@ namespace FaturaTakip.Data.Models
         public Landlord Landlord { get; set; }
 
         [ValidateNever]
-        [ForeignKey(nameof(FKApartmentId))]
+        [ForeignKey(nameof(FkApartmentId))]
         public Apartment Apartment { get; set; }
+
+        [ValidateNever]
+        [ForeignKey(nameof(FKUserId))]
+        public InvoiceTrackUser? User  { get; set; }
     }
 }

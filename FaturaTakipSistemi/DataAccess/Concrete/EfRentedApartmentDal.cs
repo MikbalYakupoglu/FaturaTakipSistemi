@@ -27,6 +27,18 @@ namespace FaturaTakip.DataAccess.Concrete
             }
         }
 
+        public async Task<RentedApartment> GetRentedApartmentByApartmentId(int? apartmentId)
+        {
+            using (var context = new InvoiceTrackContext())
+            {
+                var rentedApartment = await context.RentedApartments
+                   .Include(r => r.Apartment)
+                   .FirstOrDefaultAsync(m => m.FKApartmentId == apartmentId);
+
+                return rentedApartment;
+            }
+        }
+
         public async Task<DataResult<RentedApartment>> GetRentedApartmentByIdWithApartmentAndTenantAsync(int? rentedApartmentId)
         {
             using (var context = new InvoiceTrackContext())
@@ -56,6 +68,25 @@ namespace FaturaTakip.DataAccess.Concrete
                     .Include(a => a.Apartment)
                     .Include(a => a.Tenant)
                     .Where(ra => ra.Apartment.FKLandlordId == landlordId)
+                    .ToListAsync();
+
+                return rentedApartments;
+            }
+        }
+
+        public async Task<IEnumerable<RentedApartment>> GetTenantsRentedApartmentsByTenantId(int? tenantId)
+        {
+            if (!tenantId.HasValue)
+            {
+                return Enumerable.Empty<RentedApartment>();
+            }
+
+            using (var context = new InvoiceTrackContext())
+            {
+                var rentedApartments = await context.RentedApartments
+                    .Include(a => a.Apartment)
+                    .Include(a => a.Tenant)
+                    .Where(ra => ra.FKTenantId == tenantId)
                     .ToListAsync();
 
                 return rentedApartments;

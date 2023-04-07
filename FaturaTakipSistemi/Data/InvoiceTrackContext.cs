@@ -32,7 +32,7 @@ namespace FaturaTakip.Data
             modelBuilder.Entity<IdentityUserToken<string>>().HasNoKey();
 
 
-            modelBuilder.Entity<Apartment>().ToTable("Apartments");
+            modelBuilder.Entity<RentedApartment>().ToTable("Apartments");
             modelBuilder.Entity<Debt>().ToTable("Debts");
             modelBuilder.Entity<Landlord>().ToTable("Landlords");
             modelBuilder.Entity<Message>().ToTable("Messages");

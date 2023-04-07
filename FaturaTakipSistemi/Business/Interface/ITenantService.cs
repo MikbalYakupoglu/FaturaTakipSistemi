@@ -20,5 +20,6 @@ namespace FaturaTakip.Business.Interface
         Task<Result> UpdateTenantAsync(Tenant tenant);
         bool IsAnyTenantExist();
         Task<DataResult<IEnumerable<TenantSelectVM>>> GetTenantsViewDataAsync();
+        Task<DataResult<IEnumerable<Tenant>>> GetTenantsByLandlordIdAsync(int landlordId);
     }
 }

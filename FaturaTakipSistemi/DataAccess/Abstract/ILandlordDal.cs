@@ -6,6 +6,7 @@ namespace FaturaTakip.DataAccess.Abstract
 {
     public interface ILandlordDal : IEntityRepository<Landlord>
     {
-        Task<Landlord> GetLoginedLandlord(HttpContext httpContext);
+        Task<Landlord> GetLoginedLandlordAsync(HttpContext httpContext);
+        Task<IEnumerable<Landlord>> GetLandlordsByTenantIdAsync(int tenantId);
     }
 }

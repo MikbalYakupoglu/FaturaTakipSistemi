@@ -11,6 +11,6 @@ namespace FaturaTakip.Data.Models
         public int FKApartmentId { get; set; }
 
         [ForeignKey(nameof(FKApartmentId))]
-        public Apartment Apartment { get; set; }
+        public RentedApartment Apartment { get; set; }
     }
 }

@@ -17,7 +17,21 @@ namespace FaturaTakip.DataAccess.Concrete
             _userManager = userManager;
         }
 
-        public async Task<Landlord> GetLoginedLandlord(HttpContext httpContext)
+        public async Task<IEnumerable<Landlord>> GetLandlordsByTenantIdAsync(int tenantId)
+        {
+            using (var context = new InvoiceTrackContext())
+            {
+                var landlords = await context.Messages
+                    .Include(m => m.Landlord)
+                    .Where(m => m.FKTenantId == tenantId)
+                    .Select(m => m.Landlord)
+                    .ToListAsync();
+
+                return landlords;
+            }
+        }
+
+        public async Task<Landlord> GetLoginedLandlordAsync(HttpContext httpContext)
         {
             using(var context = new InvoiceTrackContext())
             {

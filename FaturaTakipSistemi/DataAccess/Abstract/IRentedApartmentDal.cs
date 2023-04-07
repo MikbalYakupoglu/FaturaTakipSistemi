@@ -10,5 +10,7 @@ namespace FaturaTakip.DataAccess.Abstract
         Task<DataResult<IEnumerable<RentedApartment>>> GetAllRentedApartmentsWithApartmentsAndTenantsAsync();
         Task<DataResult<RentedApartment>> GetRentedApartmentByIdWithApartmentAndTenantAsync(int? rentedApartmentId);
         Task<IEnumerable<RentedApartment>> GetRentedApartmentsByLandlordId(int? landlordId);
+        Task<IEnumerable<RentedApartment>> GetTenantsRentedApartmentsByTenantId(int? tenantId);
+        Task<RentedApartment> GetRentedApartmentByApartmentId(int? apartmentId);
     }
 }
