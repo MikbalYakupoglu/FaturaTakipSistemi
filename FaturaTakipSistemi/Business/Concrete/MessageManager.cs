@@ -77,6 +77,7 @@ namespace FaturaTakip.Business.Concrete
             return _messageDal.IsAnyExist();
         }
 
+
         public async Task<Result> AddAsync(Message messageToAdd)
         {
             var message = await _messageDal.GetAsync(m => m.Id == messageToAdd.Id);
