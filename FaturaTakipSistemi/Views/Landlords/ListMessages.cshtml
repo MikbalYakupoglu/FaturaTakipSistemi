@@ -21,10 +21,10 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Apartment.Block)
+                @Html.DisplayNameFor(model => model.RentedApartment.Apartment.Block)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Apartment.DoorNumber)
+                @Html.DisplayNameFor(model => model.RentedApartment.Apartment.DoorNumber)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Tenant.Name)
@@ -47,10 +47,10 @@
 
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Apartment.Block)
+                    @Html.DisplayFor(modelItem => item.RentedApartment.Apartment.Block)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Apartment.DoorNumber)
+                    @Html.DisplayFor(modelItem => item.RentedApartment.Apartment.DoorNumber)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Tenant.Name)

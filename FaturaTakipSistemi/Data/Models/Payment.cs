@@ -7,13 +7,14 @@ namespace FaturaTakip.Data.Models
     {
         public int Id { get; set; }
         public int Amount { get; set; }
+        public string? Info { get; set; }
         public int FKTenantId { get; set; }
-        public int FKApartmentId { get; set; }
+        public int FKRentedApartmentId { get; set; }
 
         [ForeignKey(nameof(FKTenantId))]
         public Tenant Tenant { get; set; }
         
-        [ForeignKey(nameof(FKApartmentId))]
-        public RentedApartment Apartment { get; set; }
+        [ForeignKey(nameof(FKRentedApartmentId))]
+        public RentedApartment RentedApartment { get; set; }
     }
 }

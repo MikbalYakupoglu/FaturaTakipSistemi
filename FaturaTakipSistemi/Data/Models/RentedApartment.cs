@@ -14,6 +14,8 @@ namespace FaturaTakip.Data.Models
 
         public int Id { get; set; }
         public bool Status { get; set; }
+        public DateTime RentTime { get; set; }
+
         public int FKTenantId { get; set; }
         public int FKApartmentId { get; set; }
 
@@ -25,7 +27,7 @@ namespace FaturaTakip.Data.Models
         [ForeignKey(nameof(FKApartmentId))]
         public Apartment Apartment { get; set; }
 
-
-        public DateTime RentTime { get; set; }  
+        public ICollection<Payment> Payments { get; set; }
+        public ICollection<Message> Messages { get; set; }
     }
 }

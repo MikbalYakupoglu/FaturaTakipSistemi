@@ -4,6 +4,7 @@ using FaturaTakip.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FaturaTakip.Migrations
 {
     [DbContext(typeof(InvoiceTrackContext))]
-    partial class InvoiceTrackContextModelSnapshot : ModelSnapshot
+    [Migration("20230409130754_messageRefactoredWithSender")]
+    partial class messageRefactoredWithSender
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -148,9 +150,6 @@ namespace FaturaTakip.Migrations
                     b.Property<int?>("FKTenantId")
                         .HasColumnType("int");
 
-                    b.Property<string>("FKUserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("FkSenderId")
                         .HasColumnType("nvarchar(450)");
 
@@ -168,8 +167,6 @@ namespace FaturaTakip.Migrations
                     b.HasIndex("FKRentedApartmentId");
 
                     b.HasIndex("FKTenantId");
-
-                    b.HasIndex("FKUserId");
 
                     b.HasIndex("FkSenderId");
 
@@ -504,10 +501,6 @@ namespace FaturaTakip.Migrations
                         .WithMany()
                         .HasForeignKey("FKTenantId");
 
-                    b.HasOne("InvoiceTrackUser", "User")
-                        .WithMany()
-                        .HasForeignKey("FKUserId");
-
                     b.HasOne("InvoiceTrackUser", "Sender")
                         .WithMany()
                         .HasForeignKey("FkSenderId");
@@ -519,8 +512,6 @@ namespace FaturaTakip.Migrations
                     b.Navigation("Sender");
 
                     b.Navigation("Tenant");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("FaturaTakip.Data.Models.Payment", b =>

@@ -116,13 +116,15 @@ namespace FaturaTakip.Controllers
                 if (await _userManager.IsInRoleAsync(loginedUser, nameof(Landlord).ToLower()))
                 {
                     var tenants = await _tenantService.GetTenantsByLandlordIdAsync(loginedCustomUser.Id);
-                    ViewData["FKApartmentId"] = new SelectList(_rentedApartmentService.GetRentedApartmentsByLandlordId(loginedCustomUser.Id).Result.Data, "Id", "Id");
+                    var rentedApartments = await _rentedApartmentService.GetRentedApartmentsByLandlordIdAsync(loginedCustomUser.Id);
+                    ViewData["FKRentedApartmentId"] = new SelectList(rentedApartments.Data, "Id", "Id");
                     //ViewData["FKTenantId"] = new SelectList(tenants.Data, "Id", "Id");
                 }
                 if (await _userManager.IsInRoleAsync(loginedUser, nameof(Tenant).ToLower()))
                 {
                     var landlords = await _landlordService.GetLandlordByTenantIdAsync(loginedCustomUser.Id);
-                    ViewData["FKApartmentId"] = new SelectList(_rentedApartmentService.GetTenantsRentedApartmentsByTenantIdAsync(loginedCustomUser.Id).Result.Data, "Id", "Id");
+                    var rentedApartments = await _rentedApartmentService.GetTenantsRentedApartmentsByTenantIdAsync(loginedCustomUser.Id);
+                    ViewData["FKRentedApartmentId"] = new SelectList(rentedApartments.Data, "Id", "Id");
                     //ViewData["FKLandlordId"] = new SelectList(landlords.Data, "Id", "Id");
                 }
             }
@@ -138,9 +140,10 @@ namespace FaturaTakip.Controllers
         //To protect from overposting attacks, enable the specific properties you want to bind to.
         //For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
 
+        [Authorize(Roles = "admin,moderator,landlord,tenant")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Body,FKTenantId,FKLandlordId,FkApartmentId,FKUserId")] Message message, IFormCollection form)
+        public async Task<IActionResult> Create([Bind("Id,Title,Body,FKTenantId,FKLandlordId,FKRentedApartmentId,FKUserId")] Message message)
         {
             var loginedUser = await _userManager.GetLoginedUserAsync(HttpContext);
             var loginedCustomUser = await GetLoginedUserWithType();
@@ -149,21 +152,26 @@ namespace FaturaTakip.Controllers
 
             if (loginedCustomUser != null) // Landlord veya Tenant mı
             {
+                message.FKLandlordId = loginedCustomUser.Id;
+                message.FkSenderId = loginedCustomUser.FK_UserId;
+                var usersRentedApartment = await _rentedApartmentService.GetRentedApartmentByIdAsync(message.FKRentedApartmentId);
+                message.FKRentedApartmentId = usersRentedApartment.Data.Id;
+
                 if (await _userManager.IsInRoleAsync(loginedUser, nameof(Landlord).ToLower()))
                 {
                     var tenants = await _tenantService.GetTenantsByLandlordIdAsync(loginedCustomUser.Id);
-                    message.FKLandlordId = loginedCustomUser.Id;
-                    message.FKTenantId = _rentedApartmentService.GetRentedApartmentByIdAsync(message.FkApartmentId).Result.Data.FKTenantId;
-                    message.FkApartmentId = _rentedApartmentService.GetRentedApartmentByIdAsync(message.FkApartmentId).Result.Data.FKApartmentId;
-                    ViewData["FKApartmentId"] = new SelectList(_rentedApartmentService.GetRentedApartmentsByLandlordId(loginedCustomUser.Id).Result.Data, "Id", "Id");
+                    message.FKTenantId = usersRentedApartment.Data.FKTenantId;
+
+                    var rentedApartments = await _rentedApartmentService.GetRentedApartmentsByLandlordIdAsync(loginedCustomUser.Id);
+                    ViewData["FKRentedApartmentId"] = new SelectList(rentedApartments.Data, "Id", "Id");
                 }
                 if (await _userManager.IsInRoleAsync(loginedUser, nameof(Tenant).ToLower()))
                 {
                     var landlords = await _landlordService.GetLandlordByTenantIdAsync(loginedCustomUser.Id);
-                    message.FKTenantId = loginedCustomUser.Id;
-                    message.FKLandlordId = _rentedApartmentService.GetRentedApartmentByIdAsync(message.FkApartmentId).Result.Data.Apartment.FKLandlordId;
-                    message.FkApartmentId = _rentedApartmentService.GetRentedApartmentByIdAsync(message.FkApartmentId).Result.Data.FKApartmentId;
-                    ViewData["FKApartmentId"] = new SelectList(_rentedApartmentService.GetRentedApartmentsByLandlordId(loginedCustomUser.Id).Result.Data, "Id", "Id");
+                    message.FKLandlordId = usersRentedApartment.Data.Apartment.FKLandlordId;
+
+                    var rentedApartments = await _rentedApartmentService.GetTenantsRentedApartmentsByTenantIdAsync(loginedCustomUser.Id);
+                    ViewData["FKRentedApartmentId"] = new SelectList(rentedApartments.Data, "Id", "Id");
                 }
             }
             else if (await _userManager.IsInRoleAsync(loginedUser, "admin") || (await _userManager.IsInRoleAsync(loginedUser, "moderator")))
@@ -175,16 +183,11 @@ namespace FaturaTakip.Controllers
 
                 if(selectedUser != null)
                 {
-                    if (selectedUser.GetType() == typeof(Landlord))
-                    {
-                        message.FKLandlordId = selectedUser.Id;
-                    }
-
-                    if (selectedUser.GetType() == typeof(Tenant))
-                    {
-                        message.FKTenantId = selectedUser.Id;
-                    }
+                    message.FKLandlordId = selectedUser.GetType() == typeof(Landlord) ? selectedUser.Id : message.FKLandlordId;
+                    message.FKTenantId = selectedUser.GetType() == typeof(Tenant) ? selectedUser.Id : message.FKTenantId;
                 }
+
+                message.FkSenderId = loginedUser.Id;
             }
             var result = await _messageService.AddAsync(message);
             if (result.Success)
@@ -249,7 +252,7 @@ namespace FaturaTakip.Controllers
 
             message.FKLandlordId = messageToEdit.Data.FKLandlordId;
             message.FKTenantId = messageToEdit.Data.FKTenantId;
-            message.FkApartmentId = messageToEdit.Data.FkApartmentId;
+            message.FKRentedApartmentId = messageToEdit.Data.FKRentedApartmentId;
 
             if (ModelState.IsValid)
             {

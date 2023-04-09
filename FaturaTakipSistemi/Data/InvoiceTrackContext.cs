@@ -31,7 +31,6 @@ namespace FaturaTakip.Data
             modelBuilder.Entity<IdentityUserRole<string>>().HasKey(l => new {l.UserId, l.RoleId });
             modelBuilder.Entity<IdentityUserToken<string>>().HasNoKey();
 
-
             modelBuilder.Entity<RentedApartment>().ToTable("Apartments");
             modelBuilder.Entity<Debt>().ToTable("Debts");
             modelBuilder.Entity<Landlord>().ToTable("Landlords");

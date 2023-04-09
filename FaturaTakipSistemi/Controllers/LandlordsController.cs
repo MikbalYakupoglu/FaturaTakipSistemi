@@ -270,7 +270,7 @@ namespace FaturaTakip.Controllers
             //        .Include(ra => ra.Tenant)
             //        .ToListAsync();
 
-            var landlordsRentedApartments = await _rentedApartmentService.GetRentedApartmentsByLandlordId(landlordId);
+            var landlordsRentedApartments = await _rentedApartmentService.GetRentedApartmentsByLandlordIdAsync(landlordId);
 
             return View(landlordsRentedApartments.Data);
         }

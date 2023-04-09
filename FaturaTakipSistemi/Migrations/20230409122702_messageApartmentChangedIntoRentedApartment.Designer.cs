@@ -4,6 +4,7 @@ using FaturaTakip.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FaturaTakip.Migrations
 {
     [DbContext(typeof(InvoiceTrackContext))]
-    partial class InvoiceTrackContextModelSnapshot : ModelSnapshot
+    [Migration("20230409122702_messageApartmentChangedIntoRentedApartment")]
+    partial class messageApartmentChangedIntoRentedApartment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -151,9 +153,6 @@ namespace FaturaTakip.Migrations
                     b.Property<string>("FKUserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("FkSenderId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<bool>("IsVisible")
                         .HasColumnType("bit");
 
@@ -171,8 +170,6 @@ namespace FaturaTakip.Migrations
 
                     b.HasIndex("FKUserId");
 
-                    b.HasIndex("FkSenderId");
-
                     b.ToTable("Messages", (string)null);
                 });
 
@@ -187,18 +184,15 @@ namespace FaturaTakip.Migrations
                     b.Property<int>("Amount")
                         .HasColumnType("int");
 
-                    b.Property<int>("FKRentedApartmentId")
+                    b.Property<int>("FKApartmentId")
                         .HasColumnType("int");
 
                     b.Property<int>("FKTenantId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Info")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("FKRentedApartmentId");
+                    b.HasIndex("FKApartmentId");
 
                     b.HasIndex("FKTenantId");
 
@@ -497,7 +491,7 @@ namespace FaturaTakip.Migrations
                         .HasForeignKey("FKLandlordId");
 
                     b.HasOne("FaturaTakip.Data.Models.RentedApartment", "RentedApartment")
-                        .WithMany("Messages")
+                        .WithMany()
                         .HasForeignKey("FKRentedApartmentId");
 
                     b.HasOne("FaturaTakip.Data.Models.Tenant", "Tenant")
@@ -508,15 +502,9 @@ namespace FaturaTakip.Migrations
                         .WithMany()
                         .HasForeignKey("FKUserId");
 
-                    b.HasOne("InvoiceTrackUser", "Sender")
-                        .WithMany()
-                        .HasForeignKey("FkSenderId");
-
                     b.Navigation("Landlord");
 
                     b.Navigation("RentedApartment");
-
-                    b.Navigation("Sender");
 
                     b.Navigation("Tenant");
 
@@ -525,9 +513,9 @@ namespace FaturaTakip.Migrations
 
             modelBuilder.Entity("FaturaTakip.Data.Models.Payment", b =>
                 {
-                    b.HasOne("FaturaTakip.Data.Models.RentedApartment", "RentedApartment")
-                        .WithMany("Payments")
-                        .HasForeignKey("FKRentedApartmentId")
+                    b.HasOne("FaturaTakip.Data.Models.RentedApartment", "Apartment")
+                        .WithMany()
+                        .HasForeignKey("FKApartmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -537,7 +525,7 @@ namespace FaturaTakip.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("RentedApartment");
+                    b.Navigation("Apartment");
 
                     b.Navigation("Tenant");
                 });
@@ -559,13 +547,6 @@ namespace FaturaTakip.Migrations
                     b.Navigation("Apartment");
 
                     b.Navigation("Tenant");
-                });
-
-            modelBuilder.Entity("FaturaTakip.Data.Models.RentedApartment", b =>
-                {
-                    b.Navigation("Messages");
-
-                    b.Navigation("Payments");
                 });
 #pragma warning restore 612, 618
         }

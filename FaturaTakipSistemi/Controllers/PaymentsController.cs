@@ -23,7 +23,7 @@ namespace FaturaTakip.Controllers
         // GET: Payments
         public async Task<IActionResult> Index()
         {
-            var invoiceTrackContext = _context.Payments.Include(p => p.Apartment).Include(p => p.Tenant);
+            var invoiceTrackContext = _context.Payments.Include(p => p.RentedApartment).Include(p => p.Tenant);
             return View(await invoiceTrackContext.ToListAsync());
         }
 
@@ -36,7 +36,7 @@ namespace FaturaTakip.Controllers
             }
 
             var payment = await _context.Payments
-                .Include(p => p.Apartment)
+                .Include(p => p.RentedApartment)
                 .Include(p => p.Tenant)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (payment == null)
@@ -68,7 +68,7 @@ namespace FaturaTakip.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id", payment.FKApartmentId);
+            ViewData["FKRentedApartmentId"] = new SelectList(_context.Apartments, "Id", "Id", payment.FKRentedApartmentId);
             ViewData["FKTenantId"] = new SelectList(_context.Tenants, "Id", "Id", payment.FKTenantId);
             return View(payment);
         }
@@ -86,7 +86,7 @@ namespace FaturaTakip.Controllers
             {
                 return NotFound();
             }
-            ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id", payment.FKApartmentId);
+            ViewData["FKRentedApartmentId"] = new SelectList(_context.Apartments, "Id", "Id", payment.FKRentedApartmentId);
             ViewData["FKTenantId"] = new SelectList(_context.Tenants, "Id", "Id", payment.FKTenantId);
             return View(payment);
         }
@@ -123,7 +123,7 @@ namespace FaturaTakip.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["FKApartmentId"] = new SelectList(_context.Apartments, "Id", "Id", payment.FKApartmentId);
+            ViewData["FKRentedApartmentId"] = new SelectList(_context.Apartments, "Id", "Id", payment.FKRentedApartmentId);
             ViewData["FKTenantId"] = new SelectList(_context.Tenants, "Id", "Id", payment.FKTenantId);
             return View(payment);
         }
@@ -137,7 +137,7 @@ namespace FaturaTakip.Controllers
             }
 
             var payment = await _context.Payments
-                .Include(p => p.Apartment)
+                .Include(p => p.RentedApartment)
                 .Include(p => p.Tenant)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (payment == null)

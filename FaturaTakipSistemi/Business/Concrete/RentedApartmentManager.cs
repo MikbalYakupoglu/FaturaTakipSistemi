@@ -148,12 +148,12 @@ namespace FaturaTakip.Business.Concrete
             return new SuccessDataResult<RentedApartment>((rentedApartment.Data));
         }
 
-        public async Task<DataResult<IEnumerable<RentedApartment>>> GetRentedApartmentsByLandlordId(int? landlordId)
+        public async Task<DataResult<IEnumerable<RentedApartment>>> GetRentedApartmentsByLandlordIdAsync(int? landlordId)
         {
                 var rentedApartments = await _rentedApartmentDal.GetRentedApartmentsByLandlordId(landlordId);
 
                 if (!rentedApartments.Any())
-                    return new ErrorDataResult<IEnumerable<RentedApartment>>("Kiralanmış Ev Bulunamadı.");
+                    return new ErrorDataResult<IEnumerable<RentedApartment>>(Enumerable.Empty<RentedApartment>(),"Kiralanmış Ev Bulunamadı.");
 
                 return new SuccessDataResult<IEnumerable<RentedApartment>>(rentedApartments);
             
@@ -164,7 +164,7 @@ namespace FaturaTakip.Business.Concrete
             var rentedApartments = await _rentedApartmentDal.GetTenantsRentedApartmentsByTenantId(tenantId);
 
             if (!rentedApartments.Any())
-                return new ErrorDataResult<IEnumerable<RentedApartment>>("Kiralanmış Ev Bulunamadı.");
+                return new ErrorDataResult<IEnumerable<RentedApartment>>(Enumerable.Empty<RentedApartment>(),"Kiralanmış Ev Bulunamadı.");
 
             return new SuccessDataResult<IEnumerable<RentedApartment>>(rentedApartments);
         }
