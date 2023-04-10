@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authorization;
 using FaturaTakip.Business.Interface;
 using FaturaTakip.Business.Concrete;
 using AspNetCoreHero.ToastNotification.Abstractions;
+using FaturaTakip.Utils;
 
 namespace FaturaTakip.Controllers
 {
@@ -149,15 +150,15 @@ namespace FaturaTakip.Controllers
             var loginedCustomUser = await GetLoginedUserWithType();
 
             message.IsVisible = true;
+            message.FkSenderId = loginedUser.Id;
 
             if (loginedCustomUser != null) // Landlord veya Tenant mı
             {
                 message.FKLandlordId = loginedCustomUser.Id;
-                message.FkSenderId = loginedCustomUser.FK_UserId;
                 var usersRentedApartment = await _rentedApartmentService.GetRentedApartmentByIdAsync(message.FKRentedApartmentId);
                 message.FKRentedApartmentId = usersRentedApartment.Data.Id;
 
-                if (await _userManager.IsInRoleAsync(loginedUser, nameof(Landlord).ToLower()))
+                if (await _userManager.IsInRoleAsync(loginedUser, Roles.Landlord))
                 {
                     var tenants = await _tenantService.GetTenantsByLandlordIdAsync(loginedCustomUser.Id);
                     message.FKTenantId = usersRentedApartment.Data.FKTenantId;
@@ -165,7 +166,7 @@ namespace FaturaTakip.Controllers
                     var rentedApartments = await _rentedApartmentService.GetRentedApartmentsByLandlordIdAsync(loginedCustomUser.Id);
                     ViewData["FKRentedApartmentId"] = new SelectList(rentedApartments.Data, "Id", "Id");
                 }
-                if (await _userManager.IsInRoleAsync(loginedUser, nameof(Tenant).ToLower()))
+                if (await _userManager.IsInRoleAsync(loginedUser, Roles.Tenant))
                 {
                     var landlords = await _landlordService.GetLandlordByTenantIdAsync(loginedCustomUser.Id);
                     message.FKLandlordId = usersRentedApartment.Data.Apartment.FKLandlordId;
@@ -187,7 +188,6 @@ namespace FaturaTakip.Controllers
                     message.FKTenantId = selectedUser.GetType() == typeof(Tenant) ? selectedUser.Id : message.FKTenantId;
                 }
 
-                message.FkSenderId = loginedUser.Id;
             }
             var result = await _messageService.AddAsync(message);
             if (result.Success)
