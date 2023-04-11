@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using FaturaTakip.Data.Models;
 using FaturaTakip.ViewModels;
+using Microsoft.Build.Framework;
 
 namespace FaturaTakip.AutoMapper
 {
@@ -21,6 +22,12 @@ namespace FaturaTakip.AutoMapper
 
             CreateMap<Tenant, TenantSelectVM>()
                 .ForMember(dest => dest.GovermentIdAndName, opt => opt.MapFrom(src => $"{src.GovermentId} - {src.Name} {src.LastName}"));
+
+            CreateMap<Message, MessageVM>()
+                .ForMember(dest => dest.LandlordFullName, opt => opt.MapFrom(src => $"{src.Landlord.Name} {src.Landlord.LastName}"))
+                .ForMember(dest => dest.TenantFullName, opt => opt.MapFrom(src => $"{src.Tenant.Name} {src.Tenant.LastName}"))
+                .ForMember(dest => dest.SenderName, opt => opt.MapFrom(src => $"{src.Sender.Name} {src.Sender.LastName}"));
+
         }
     }
 }

@@ -13,6 +13,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using FaturaTakip.Business.Interface;
+using FaturaTakip.Business.Concrete;
 
 namespace FaturaTakip.Areas.Admin.Pages.Manage
 {
@@ -63,6 +64,10 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
             [StringLength(50)]
             public string LastName { get; set; }
 
+            [Required]
+            [Display(Name = "YearOfBirth")]
+            [Range(1900, 2022)]
+            public int YearOfBirth { get; set; }
 
             [Required]
             [Display(Name = "Phone")]
@@ -70,10 +75,10 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
             [Phone]
             public string PhoneNumber { get; set; }
 
-            [Required]
-            [EmailAddress]
-            [Display(Name = "Email")]
-            public string Email { get; set; }
+            //[Required]
+            //[EmailAddress]
+            //[Display(Name = "Email")]
+            //public string Email { get; set; }
 
             //[Required]
             //public Dictionary<string,bool>? Roles { get; set; }
@@ -95,7 +100,8 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
                 Name = user.Name,
                 LastName = user.LastName,
                 PhoneNumber = user.PhoneNumber,
-                Email = user.Email,
+                YearOfBirth = user.YearOfBirth,
+                //Email = user.Email,
                 //Roles = AllRoleNames.ToDictionary(r => r, b => false)
                 Roles = new List<string>()
             };
@@ -163,16 +169,16 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
                 }
             }
 
-            var email = await _userManager.GetEmailAsync(user);
-            if (Input.Email != email)
-            {
-                var setEmailResult = await _userManager.SetEmailAsync(user, Input.Email);
-                if (!setEmailResult.Succeeded)
-                {
-                    StatusMessage = "Unexpected error when trying to set email.";
-                    return RedirectToPage();
-                }
-            }
+            //var email = await _userManager.GetEmailAsync(user);
+            //if (Input.Email != email)
+            //{
+            //    var setEmailResult = await _userManager.SetEmailAsync(user, Input.Email);
+            //    if (!setEmailResult.Succeeded)
+            //    {
+            //        StatusMessage = "Unexpected error when trying to set email.";
+            //        return RedirectToPage();
+            //    }
+            //}
 
             var userToUpdate = await GetSelectedUserFromTable(user.GovermentId);
             if (userToUpdate != null)
@@ -200,6 +206,32 @@ namespace FaturaTakip.Areas.Admin.Pages.Manage
                 {
                     invoiceTrackUserToUpdate.LastName = Input.LastName;
                 }
+            }
+
+            var customUser = await _userManager.GetCustomUserWithUserIdAsync(user.Id);
+            if (customUser.GetType() == typeof(Landlord))
+            {
+                var newLandlord = new Landlord()
+                {
+                    Id = customUser.Id,
+                    Name = Input.Name,
+                    LastName = Input.LastName,
+                    YearOfBirth = Input.YearOfBirth,
+                    Phone = Input.PhoneNumber
+                };
+                await _landlordService.UpdateLandlordAsync(newLandlord);
+            }
+            else if (customUser.GetType() == typeof(Tenant))
+            {
+                var newTenant = new Tenant()
+                {
+                    Id = customUser.Id,
+                    Name = Input.Name,
+                    LastName = Input.LastName,
+                    YearOfBirth = Input.YearOfBirth,
+                    Phone = Input.PhoneNumber
+                };
+                await _tenantService.UpdateTenantAsync(newTenant);
             }
 
 

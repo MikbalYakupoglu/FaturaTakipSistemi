@@ -15,20 +15,38 @@ namespace FaturaTakip.DataAccess.Concrete
                 var messages = await context.Messages
                         .Include(m => m.Landlord)
                         .Include(m => m.Tenant)
+                        .Include(m => m.Sender)
                         .ToListAsync();
 
                 return messages;
             }
         }
 
-        public async Task<IEnumerable<Message>> GetLandlordsMessagesAsync(int userId)
+        public async Task<IEnumerable<Message>> GetLandlordsMessagesAsync(int landlordId)
         {
             using (var context = new InvoiceTrackContext())
             {
                 var messages = await context.Messages
                     .Include(m => m.Landlord)
-                    .Where(m => m.FKLandlordId == userId)
+                    .Include(m => m.Tenant)
+                    .Include(m => m.Sender)
+                    .Where(m => m.FKLandlordId == landlordId)
                     .ToListAsync();
+
+                return messages;
+            }
+        }
+
+        public async Task<IEnumerable<Message>> GetTenantsMessagesAsync(int tenantId)
+        {
+            using (var context = new InvoiceTrackContext())
+            {
+                var messages = await context.Messages
+                .Include(m => m.Tenant)
+                .Include(m => m.Landlord)
+                .Include(m => m.Sender)
+                .Where(m => m.FKTenantId == tenantId)
+                .ToListAsync();
 
                 return messages;
             }
@@ -39,25 +57,14 @@ namespace FaturaTakip.DataAccess.Concrete
             using (var context = new InvoiceTrackContext())
             {
                 var message = await context.Messages
-                    .Include(m=> m.Landlord)
-                    .Include(m=> m.Tenant)
-                    .SingleOrDefaultAsync(m=> m.Id == messageId);
+                    .Include(m => m.Landlord)
+                    .Include(m => m.Tenant)
+                    .Include(m => m.Sender)
+                    .SingleOrDefaultAsync(m => m.Id == messageId);
 
                 return message;
             }
         }
 
-        public async Task<IEnumerable<Message>> GetTenantsMessagesAsync(int userId)
-        {
-            using (var context = new InvoiceTrackContext())
-            {
-                var messages = await context.Messages
-                .Include(m => m.Tenant)
-                .Where(m => m.FKTenantId == userId)
-                .ToListAsync();
-
-                return messages;
-            }
-        }
     }
 }

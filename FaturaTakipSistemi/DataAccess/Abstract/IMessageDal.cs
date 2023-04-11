@@ -7,8 +7,8 @@ namespace FaturaTakip.DataAccess.Abstract
     {
         Task<Message> GetMessageByIdWithRelationsAsync(int? messageId);
         Task<IEnumerable<Message>> GetAllMessagesWithRelationsAsync();
-        Task<IEnumerable<Message>> GetLandlordsMessagesAsync(int userId);
-        Task<IEnumerable<Message>> GetTenantsMessagesAsync(int userId);
+        Task<IEnumerable<Message>> GetLandlordsMessagesAsync(int landlordId);
+        Task<IEnumerable<Message>> GetTenantsMessagesAsync(int tenantId);
 
     }
 }

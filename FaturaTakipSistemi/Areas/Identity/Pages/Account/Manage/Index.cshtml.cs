@@ -6,6 +6,9 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using FaturaTakip.Business.Concrete;
+using FaturaTakip.Business.Interface;
+using FaturaTakip.Data.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -16,13 +19,19 @@ namespace FaturaTakip.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<InvoiceTrackUser> _userManager;
         private readonly SignInManager<InvoiceTrackUser> _signInManager;
+        private readonly ITenantService _tenantService;
+        private readonly ILandlordService _landlordService;
 
         public IndexModel(
             UserManager<InvoiceTrackUser> userManager,
-            SignInManager<InvoiceTrackUser> signInManager)
+            SignInManager<InvoiceTrackUser> signInManager,
+            ITenantService tenantService,
+            ILandlordService landlordService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _tenantService = tenantService;
+            _landlordService = landlordService;
         }
 
         /// <summary>
@@ -150,6 +159,34 @@ namespace FaturaTakip.Areas.Identity.Pages.Account.Manage
             if (Input.YearOfBirth != user.YearOfBirth)
             {
                 user.YearOfBirth= Input.YearOfBirth;
+            }
+
+            var customUser = await _userManager.GetCustomUserWithUserIdAsync(user.Id);
+            if(customUser.GetType() == typeof(Landlord))
+            {
+                var newLandlord = new Landlord()
+                {
+                    Id = customUser.Id,
+                    Name = Input.Name,
+                    LastName = Input.LastName,
+                    GovermentId = Input.GovermentId,
+                    YearOfBirth = Input.YearOfBirth,
+                    Phone = Input.PhoneNumber
+                };
+                await _landlordService.UpdateLandlordAsync(newLandlord);
+            }
+            else if(customUser.GetType() == typeof(Tenant))
+            {
+                var newTenant = new Tenant()
+                {
+                    Id = customUser.Id,
+                    Name = Input.Name,
+                    LastName = Input.LastName,
+                    GovermentId = Input.GovermentId,
+                    YearOfBirth = Input.YearOfBirth,
+                    Phone = Input.PhoneNumber
+                };
+                await _tenantService.UpdateTenantAsync(newTenant);
             }
 
             await _userManager.UpdateAsync(user);

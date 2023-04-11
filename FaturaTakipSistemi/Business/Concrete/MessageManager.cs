@@ -1,46 +1,52 @@
-﻿using FaturaTakip.Business.Interface;
+﻿using AutoMapper;
+using FaturaTakip.Business.Interface;
 using FaturaTakip.Data.Models;
 using FaturaTakip.Data.Models.Abstract;
 using FaturaTakip.DataAccess.Abstract;
 using FaturaTakip.Utils;
 using FaturaTakip.Utils.Results;
+using FaturaTakip.ViewModels;
 
 namespace FaturaTakip.Business.Concrete
 {
     public class MessageManager : IMessageService
     {
         private readonly IMessageDal _messageDal;
+        private readonly IMapper _mapper;
 
-        public MessageManager(IMessageDal messageDal)
+        public MessageManager(IMessageDal messageDal,
+            IMapper mapper)
         {
             _messageDal = messageDal;
+            _mapper = mapper;
         }
 
-        public async Task<DataResult<IEnumerable<Message>>> GetAllMessagesAsync()
+        public async Task<DataResult<IEnumerable<MessageVM>>> GetAllMessagesAsync()
         {
             var messages = await _messageDal.GetAllMessagesWithRelationsAsync();
 
-            if(!messages.Any())
-                return new ErrorDataResult<IEnumerable<Message>>(Enumerable.Empty<Message>(), "Mesaj Bulunamadı.");
+            if (!messages.Any())
+                return new ErrorDataResult<IEnumerable<MessageVM>>(Enumerable.Empty<MessageVM>(), "Mesaj Bulunamadı.");
 
-            return new SuccessDataResult<IEnumerable<Message>>(messages);
+            return new SuccessDataResult<IEnumerable<MessageVM>>(_mapper.Map<IEnumerable<MessageVM>>(messages));
         }
 
-        public async Task<DataResult<IEnumerable<Message>>> GetLoginedUsersMessagesAsync(User user)
+        public async Task<DataResult<IEnumerable<MessageVM>>> GetMessagesByUserAsync(User user)
         {
             if (user.GetType() == typeof(Landlord))
             {
                 var messages = await GetMessagesByLandlordIdAsync(user.Id);
-                return new SuccessDataResult<IEnumerable<Message>>(messages.Data);
+                return new SuccessDataResult<IEnumerable<MessageVM>>(_mapper.Map<IEnumerable<MessageVM>>(messages.Data));
             }
 
             if (user.GetType() == typeof(Tenant))
             {
                 var messages = await GetMessagesByTenantIdAsync(user.Id);
-                return new SuccessDataResult<IEnumerable<Message>>(messages.Data);
+                return new SuccessDataResult<IEnumerable<MessageVM>>(_mapper.Map<IEnumerable<MessageVM>>(messages.Data));
             }
 
-            return new ErrorDataResult<IEnumerable<Message>>(Enumerable.Empty<Message>(), "Girilen Kullanıcıya Ait Mesaj Bulunamadı.");
+
+            return new ErrorDataResult<IEnumerable<MessageVM>>(Enumerable.Empty<MessageVM>(), "Girilen Kullanıcıya Ait Mesaj Bulunamadı.");
         }
 
         public async Task<DataResult<Message>> GetMessageByIdAsync(int? messageId)
@@ -51,27 +57,6 @@ namespace FaturaTakip.Business.Concrete
 
             return new SuccessDataResult<Message>(message);
         }
-
-        public async Task<DataResult<IEnumerable<Message>>> GetMessagesByLandlordIdAsync(int landlordId)
-        {
-            var messages = await _messageDal.GetLandlordsMessagesAsync(landlordId);
-
-            if(!messages.Any())
-                return new ErrorDataResult<IEnumerable<Message>>(Enumerable.Empty<Message>(), "Mesaj Bulunamadı.");
-
-            return new SuccessDataResult<IEnumerable<Message>>(messages);
-        }
-
-        public async Task<DataResult<IEnumerable<Message>>> GetMessagesByTenantIdAsync(int tenantId)
-        {
-            var messages = await _messageDal.GetTenantsMessagesAsync(tenantId);
-
-            if (!messages.Any())
-                return new ErrorDataResult<IEnumerable<Message>>(Enumerable.Empty<Message>(), "Mesaj Bulunamadı.");
-
-            return new SuccessDataResult<IEnumerable<Message>>(messages);
-        }
-
         public bool IsAnyMessageExist()
         {
             return _messageDal.IsAnyExist();
@@ -99,7 +84,7 @@ namespace FaturaTakip.Business.Concrete
 
         public async Task<Result> UpdateAsync(Message message)
         {
-            var messageToUpdate = await _messageDal.GetAsync(m=> m.Id == message.Id);
+            var messageToUpdate = await _messageDal.GetAsync(m => m.Id == message.Id);
             if (messageToUpdate == null)
                 return new ErrorResult("Mesaj Bulunamadı.");
 
@@ -111,5 +96,25 @@ namespace FaturaTakip.Business.Concrete
             return new SuccessResult(Messages.UpdateSuccess);
         }
 
+
+        private async Task<DataResult<IEnumerable<Message>>> GetMessagesByLandlordIdAsync(int landlordId)
+        {
+            var messages = await _messageDal.GetLandlordsMessagesAsync(landlordId);
+
+            if (!messages.Any())
+                return new ErrorDataResult<IEnumerable<Message>>(Enumerable.Empty<Message>(), "Mesaj Bulunamadı.");
+
+            return new SuccessDataResult<IEnumerable<Message>>(messages);
+        }
+
+        private async Task<DataResult<IEnumerable<Message>>> GetMessagesByTenantIdAsync(int tenantId)
+        {
+            var messages = await _messageDal.GetTenantsMessagesAsync(tenantId);
+
+            if (!messages.Any())
+                return new ErrorDataResult<IEnumerable<Message>>(Enumerable.Empty<Message>(), "Mesaj Bulunamadı.");
+
+            return new SuccessDataResult<IEnumerable<Message>>(messages);
+        }
     }
 }

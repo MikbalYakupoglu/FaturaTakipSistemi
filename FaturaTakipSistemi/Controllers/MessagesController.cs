@@ -53,12 +53,12 @@ namespace FaturaTakip.Controllers
             {
                 if (await _userManager.IsInRoleAsync(loginedUser, nameof(Landlord).ToLower()))
                 {
-                    var messages = await _messageService.GetMessagesByLandlordIdAsync(loginedCustomUser.Id);
+                    var messages = await _messageService.GetMessagesByUserAsync(loginedCustomUser);
                     return View(messages.Data);
                 }
                 if (await _userManager.IsInRoleAsync(loginedUser, nameof(Tenant).ToLower()))
                 {
-                    var messages = await _messageService.GetMessagesByTenantIdAsync(loginedCustomUser.Id);
+                    var messages = await _messageService.GetMessagesByUserAsync(loginedCustomUser);
                     return View(messages.Data);
                 }
             }
@@ -154,13 +154,13 @@ namespace FaturaTakip.Controllers
 
             if (loginedCustomUser != null) // Landlord veya Tenant mı
             {
-                message.FKLandlordId = loginedCustomUser.Id;
                 var usersRentedApartment = await _rentedApartmentService.GetRentedApartmentByIdAsync(message.FKRentedApartmentId);
                 message.FKRentedApartmentId = usersRentedApartment.Data.Id;
 
                 if (await _userManager.IsInRoleAsync(loginedUser, Roles.Landlord))
                 {
-                    var tenants = await _tenantService.GetTenantsByLandlordIdAsync(loginedCustomUser.Id);
+                    //var tenants = await _tenantService.GetTenantsByLandlordIdAsync(loginedCustomUser.Id);
+                    message.FKLandlordId = loginedCustomUser.Id;
                     message.FKTenantId = usersRentedApartment.Data.FKTenantId;
 
                     var rentedApartments = await _rentedApartmentService.GetRentedApartmentsByLandlordIdAsync(loginedCustomUser.Id);
@@ -168,7 +168,8 @@ namespace FaturaTakip.Controllers
                 }
                 if (await _userManager.IsInRoleAsync(loginedUser, Roles.Tenant))
                 {
-                    var landlords = await _landlordService.GetLandlordByTenantIdAsync(loginedCustomUser.Id);
+                    //var landlords = await _landlordService.GetLandlordByTenantIdAsync(loginedCustomUser.Id);
+                    message.FKTenantId = loginedCustomUser.Id;
                     message.FKLandlordId = usersRentedApartment.Data.Apartment.FKLandlordId;
 
                     var rentedApartments = await _rentedApartmentService.GetTenantsRentedApartmentsByTenantIdAsync(loginedCustomUser.Id);

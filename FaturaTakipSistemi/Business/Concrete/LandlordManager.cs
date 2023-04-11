@@ -56,11 +56,27 @@ namespace FaturaTakip.Business.Concrete
             if (landlordToUpdate == null)
                 return new ErrorResult("Ev Sahibi Bulunamadı.");
 
-            landlordToUpdate.Name = landlord.Name;
-            landlordToUpdate.LastName = landlord.LastName;
-            landlordToUpdate.GovermentId = landlord.GovermentId;
-            landlordToUpdate.YearOfBirth = landlord.YearOfBirth;
-            landlordToUpdate.Phone = landlord.Phone;
+            if(landlordToUpdate.Name != landlord.Name && !string.IsNullOrEmpty(landlord.Name))
+            {
+                landlordToUpdate.Name = landlord.Name;
+            }
+            if (landlordToUpdate.LastName != landlord.LastName && !string.IsNullOrEmpty(landlord.LastName))
+            {
+                landlordToUpdate.LastName = landlord.LastName;
+            }
+            if (landlordToUpdate.GovermentId != landlord.GovermentId && !string.IsNullOrEmpty(landlord.GovermentId))
+            {
+                landlordToUpdate.GovermentId = landlord.GovermentId;
+            }
+            if (landlordToUpdate.YearOfBirth != landlord.YearOfBirth && !string.IsNullOrEmpty(landlord.YearOfBirth.ToString()))
+            {
+                landlordToUpdate.YearOfBirth = landlord.YearOfBirth;
+            }
+            if (landlordToUpdate.Phone != landlord.Phone && !string.IsNullOrEmpty(landlord.Phone))
+            {
+                landlordToUpdate.Phone = landlord.Phone;
+            }
+
             await _landlordDal.UpdateAsync(landlordToUpdate);
 
             return new SuccessResult();

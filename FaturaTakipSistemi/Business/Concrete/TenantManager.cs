@@ -112,15 +112,31 @@ namespace FaturaTakip.Business.Concrete
 
             if(tenantToUpdate == null)
                 return new ErrorResult("Kiracı Bulunamadı.");
-
-
-            tenantToUpdate.Name = tenant.Name;
-            tenantToUpdate.LastName = tenant.LastName;
-            tenantToUpdate.GovermentId = tenant.GovermentId;
-            tenantToUpdate.YearOfBirth = tenant.YearOfBirth;
-            tenantToUpdate.Email = tenant.Email;
-            tenantToUpdate.Phone = tenant.Phone;
-            tenantToUpdate.LisencePlate = tenant.LisencePlate;
+                
+            if (tenantToUpdate.Name != tenant.Name && !string.IsNullOrEmpty(tenant.Name))
+            {
+                tenantToUpdate.Name = tenant.Name;
+            }
+            if (tenantToUpdate.LastName != tenant.LastName && !string.IsNullOrEmpty(tenant.LastName))
+            {
+                tenantToUpdate.LastName = tenant.LastName;
+            }
+            if (tenantToUpdate.GovermentId != tenant.GovermentId && !string.IsNullOrEmpty(tenant.GovermentId))
+            {
+                tenantToUpdate.GovermentId = tenant.GovermentId;
+            }
+            if (tenantToUpdate.YearOfBirth != tenant.YearOfBirth && !string.IsNullOrEmpty(tenant.YearOfBirth.ToString()))
+            {
+                tenantToUpdate.YearOfBirth = tenant.YearOfBirth;
+            }
+            if (tenantToUpdate.Phone != tenant.Phone && !string.IsNullOrEmpty(tenant.Phone))
+            {
+                tenantToUpdate.Phone = tenant.Phone;
+            }
+            if (tenantToUpdate.LisencePlate != tenant.LisencePlate && !string.IsNullOrEmpty(tenant.LisencePlate))
+            {
+                tenantToUpdate.LisencePlate = tenant.LisencePlate;
+            }
 
             await _tenantDal.UpdateAsync(tenantToUpdate);
             return new SuccessResult();

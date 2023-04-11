@@ -31,10 +31,10 @@ namespace FaturaTakip.Data.Models
 
         [ValidateNever]
         [ForeignKey(nameof(FkSenderId))]
-        public InvoiceTrackUser? Sender  { get; set; }
+        public InvoiceTrackUser Sender  { get; set; }
 
         [ValidateNever]
         [ForeignKey(nameof(FKUserId))]
-        public InvoiceTrackUser? User { get; set; }
+        public InvoiceTrackUser User { get; set; }
     }
 }

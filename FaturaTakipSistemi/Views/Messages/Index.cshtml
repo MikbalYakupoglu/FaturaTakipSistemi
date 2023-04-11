@@ -1,4 +1,4 @@
-﻿@model IEnumerable<FaturaTakip.Data.Models.Message>
+﻿@model IEnumerable<FaturaTakip.ViewModels.MessageVM>
 
 @{
     ViewData["Title"] = "Index";
@@ -19,35 +19,53 @@
                 @Html.DisplayNameFor(model => model.Body)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Tenant)
+                @Html.DisplayNameFor(model => model.LandlordFullName)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Landlord)
+                @Html.DisplayNameFor(model => model.TenantFullName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SenderName)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Body)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Tenant.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Landlord.Id)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Title)
+                </td>
+                @if(item.Body.Length < 40)
+                {
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Body)
+                    </td>
+                }
+                @if(item.Body.Length >=40)
+                {
+                    var shortBody = item.Body.Substring(0, 40);
+                    <td>
+                        @Html.DisplayFor(modelItem => shortBody)...
+                    </td>
+                }
+                <td>
+                    @Html.DisplayFor(modelItem => item.LandlordFullName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TenantFullName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.SenderName)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

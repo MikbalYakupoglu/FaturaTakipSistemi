@@ -1,15 +1,14 @@
 ﻿using FaturaTakip.Data.Models;
 using FaturaTakip.Data.Models.Abstract;
 using FaturaTakip.Utils.Results;
+using FaturaTakip.ViewModels;
 
 namespace FaturaTakip.Business.Interface
 {
     public interface IMessageService
     {
-        Task<DataResult<IEnumerable<Message>>> GetAllMessagesAsync();
-        Task<DataResult<IEnumerable<Message>>> GetMessagesByTenantIdAsync(int tenantId);
-        Task<DataResult<IEnumerable<Message>>> GetMessagesByLandlordIdAsync(int landlordId);
-        Task<DataResult<IEnumerable<Message>>> GetLoginedUsersMessagesAsync(User user);
+        Task<DataResult<IEnumerable<MessageVM>>> GetAllMessagesAsync();
+        Task<DataResult<IEnumerable<MessageVM>>> GetMessagesByUserAsync(User user);
         bool IsAnyMessageExist();
         Task<DataResult<Message>> GetMessageByIdAsync(int? messageId);
         Task<Result> AddAsync(Message messageToAdd);
