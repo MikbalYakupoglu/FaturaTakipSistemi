@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using AutoMapper;
+using FaturaTakip.Business.Aspects;
 using FaturaTakip.Business.Interface;
 using FaturaTakip.Data;
 using FaturaTakip.Data.Models;
@@ -15,7 +17,8 @@ namespace FaturaTakip.Business.Concrete
         private readonly IApartmentDal _apartmentDal;
         private readonly IMapper _mapper;
         public ApartmentManager(IApartmentDal apartmentDal,
-            IMapper mapper)
+            IMapper mapper
+            )
         {
             _apartmentDal = apartmentDal;
             _mapper = mapper;
@@ -66,6 +69,7 @@ namespace FaturaTakip.Business.Concrete
             
         }
 
+        [NotificationAspect]
         public async Task<Result> AddApartmentAsync(Apartment apartmentToAdd)
         {
             var apartment = await _apartmentDal.GetAsync(a => a.Id == apartmentToAdd.Id);
@@ -83,6 +87,7 @@ namespace FaturaTakip.Business.Concrete
 
         }
 
+        [NotificationAspect]
         public async Task<Result> DeleteApartmentAsync(int apartmentId)
         {
             var apartmentToDelete = await _apartmentDal.GetAsync(a => a.Id == apartmentId);
@@ -96,6 +101,7 @@ namespace FaturaTakip.Business.Concrete
             return new SuccessResult(Messages.RemoveSuccess);
         }
 
+        [NotificationAspect]
         public async Task<Result> UpdateApartmentAsync(Apartment apartment)
         {
             var apartmentToUpdate = await _apartmentDal.GetAsync(a => a.Id == apartment.Id);
@@ -114,6 +120,28 @@ namespace FaturaTakip.Business.Concrete
             apartmentToUpdate.RentPrice = apartment.RentPrice;
 
             await _apartmentDal.UpdateAsync(apartmentToUpdate);
+            return new SuccessResult(Messages.UpdateSuccess);
+        }
+
+        [NotificationAspect]
+        public Result UpdateApartment(Apartment apartment)
+        {
+            var apartmentToUpdate = _apartmentDal.GetAsync(a => a.Id == apartment.Id).Result;
+
+            if (apartment == null)
+                return new ErrorResult("Ev Bulunamadı.");
+
+            if (apartment.Type == Data.Models.Type.None)
+                return new ErrorResult(Messages.TypeCannotBeNone);
+
+            apartmentToUpdate.FKLandlordId = apartment.FKLandlordId;
+            apartmentToUpdate.Block = apartment.Block;
+            apartmentToUpdate.Floor = apartment.Floor;
+            apartmentToUpdate.DoorNumber = apartment.DoorNumber;
+            apartmentToUpdate.Type = apartment.Type;
+            apartmentToUpdate.RentPrice = apartment.RentPrice;
+
+            _apartmentDal.UpdateAsync(apartmentToUpdate);
             return new SuccessResult(Messages.UpdateSuccess);
         }
 

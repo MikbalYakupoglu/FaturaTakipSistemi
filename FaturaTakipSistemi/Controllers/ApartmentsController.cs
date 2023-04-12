@@ -74,12 +74,12 @@ namespace FaturaTakip.Controllers
                 var result = await _apartmentService.AddApartmentAsync(apartment);
                 if (!result.Success)
                 {
-                    _notyf.Error(result.Message);
+                    //_notyf.Error(result.Message);
                     return View(apartment);
                 }
                 else
                 {
-                    _notyf.Success(result.Message);
+                    //_notyf.Success(result.Message);
                     return RedirectToAction(nameof(Index));
                 }
             }
@@ -128,14 +128,18 @@ namespace FaturaTakip.Controllers
             {
                 try
                 {
-                    var result = await _apartmentService.UpdateApartmentAsync(apartment);
-                    if (result.Success)
-                        _notyf.Success(result.Message);
-                    else
-                    {
-                        _notyf.Error(result.Message);
-                        return View(apartment);
-                    }
+                    //var result = await _apartmentService.UpdateApartmentAsync(apartment);
+
+                    var result = _apartmentService.UpdateApartment(apartment);
+
+
+                    //if (result.Success)
+                    //    _notyf.Success(result.Message);
+                    //else
+                    //{
+                    //    _notyf.Error(result.Message);
+                    //    return View(apartment);
+                    //}
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -188,10 +192,10 @@ namespace FaturaTakip.Controllers
             if (apartment.Success)
             {
                 var result = await _apartmentService.DeleteApartmentAsync(id);
-                if (result.Success)
-                    _notyf.Success(result.Message);
-                else
-                    _notyf.Error(result.Message);
+                //if (result.Success)
+                //    //_notyf.Success(result.Message);
+                //else
+                //    //_notyf.Error(result.Message);
             }
             
             return RedirectToAction(nameof(Index));

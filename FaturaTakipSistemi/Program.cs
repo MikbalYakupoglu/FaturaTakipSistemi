@@ -2,23 +2,43 @@ using System.Globalization;
 using System.Reflection;
 using AspNetCoreHero.ToastNotification;
 using AspNetCoreHero.ToastNotification.Extensions;
+using FaturaTakip.Business.Aspects;
 using FaturaTakip.Business.Concrete;
 using FaturaTakip.Business.Interface;
+using FaturaTakip.Core.DependencyResolvers;
+using FaturaTakip.Core.Extensions;
 using FaturaTakip.Data;
 using FaturaTakip.DataAccess.Abstract;
 using FaturaTakip.DataAccess.Concrete;
 using FaturaTakip.Resources;
 using FaturaTakip.Services;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
+using Castle.MicroKernel.Registration;
+using Castle.Windsor;
+using Castle.Core;
+using Autofac.Extensions.DependencyInjection;
+using Autofac;
+using Castle.DynamicProxy;
+using FaturaTakip.Business.DependencyResolvers;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//Autofac
+builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
+builder.Host.ConfigureContainer<ContainerBuilder>(builder =>
+    builder.RegisterModule(new AutofacBusinessModule()));
+
+
+builder.Services.AddDependencyResolvers(new ICoreModule[]
+{
+    new CoreModule()
+});
 // Add services to the container.
+
+builder.Services.AddTransient<NotificationAspectAttribute>();
+
 builder.Services.AddSingleton<CommonLocalizationService>();
 
 builder.Services.AddScoped<ITenantDal, EfTenantDal>();
@@ -30,11 +50,6 @@ builder.Services.AddScoped<IMessageDal, EfMessageDal>();
 builder.Services.AddScoped<IPaymentDal, EfPaymentDal>();
 
 
-builder.Services.AddScoped<ITenantService, TenantManager>();
-builder.Services.AddScoped<ILandlordService, LandlordManager>();
-builder.Services.AddScoped<IApartmentService, ApartmentManager>();
-builder.Services.AddScoped<IRentedApartmentService, RentedApartmentManager>();
-builder.Services.AddScoped<IMessageService, MessageManager>();
 
 
 
@@ -49,6 +64,25 @@ builder.Services.AddNotyf(config =>
 });
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+
+var container = new WindsorContainer();
+var containerBuilder = new ContainerBuilder();
+
+// Register all classes in the current AppDomain that have methods decorated with the NotificationAspectAttribute
+var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+foreach (var assembly in assemblies)
+{
+    container.Register(
+        Classes.FromAssembly(assembly)
+            .BasedOn<object>()
+            .If(type => type.GetMethods().Any(m => m.GetCustomAttributes(typeof(NotificationAspectAttribute), true).Length > 0))
+            .Configure(configurer =>
+                configurer
+                    .Interceptors(InterceptorReference.ForType<NotificationAspectAttribute>())
+                    
+    ).LifestyleTransient());
+}
 
 //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 //builder.Services.AddDbContext<InvoiceTrackContext>(options =>

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using FaturaTakip.Business.Aspects;
 using FaturaTakip.Business.Interface;
 using FaturaTakip.Data;
 using FaturaTakip.Data.Models;

@@ -23,6 +23,7 @@ namespace FaturaTakip.Business.Concrete
             using(var context = new InvoiceTrackContext())
             {
                 var users = await context.Users.ToListAsync();
+
                 return users;
             }
         }

@@ -1,4 +1,5 @@
-﻿using FaturaTakip.Data.Models;
+﻿using FaturaTakip.Business.Aspects;
+using FaturaTakip.Data.Models;
 using FaturaTakip.Utils.Results;
 using FaturaTakip.ViewModels;
 using System.Collections;
@@ -19,6 +20,9 @@ namespace FaturaTakip.Business.Interface
         Task<Result> UpdateApartmentAsync(Apartment apartment);
         Task<DataResult<Apartment>> GetApartmentByIdAsync(int? id);
         Task<DataResult<IEnumerable<Apartment>>> GetLandlordsUntenantedApartmentsAsync(int? landlordId);
+
+
+        Result UpdateApartment(Apartment apartment);
 
     }
 }

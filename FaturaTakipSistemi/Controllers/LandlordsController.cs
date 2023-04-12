@@ -123,6 +123,7 @@ namespace FaturaTakip.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "admin,moderator")]
+        [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> Edit(int id, [Bind(include: $"{nameof(Landlord.Name)},{nameof(Landlord.LastName)},{nameof(Landlord.GovermentId)}," +
                                                             $"{nameof(Landlord.YearOfBirth)},{nameof(Landlord.Email)},{nameof(Landlord.Phone)}")] Landlord landlord)
         {
@@ -188,6 +189,7 @@ namespace FaturaTakip.Controllers
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "admin,moderator")]
+        [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             if (!_landlordService.IsAnyLandlordExist())
@@ -221,8 +223,10 @@ namespace FaturaTakip.Controllers
 
         #region Apartment
 
+        [HttpGet]
         [Authorize(Roles = "landlord,admin,moderator")]
         [Route("landlords/manage/apartments")]
+        [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> ListApartments()
         {
             var landlordId = await GetLoginedLandlordId();
@@ -260,6 +264,8 @@ namespace FaturaTakip.Controllers
 
         [Authorize(Roles = "landlord,admin,moderator")]
         [Route("landlords/manage/tenants")]
+        [HttpGet]
+        [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> ListTenants()
         {
             var landlordId = await GetLoginedLandlordId();
@@ -277,6 +283,8 @@ namespace FaturaTakip.Controllers
 
         [Authorize(Roles = "landlord,admin,moderator")]
         [Route("landlords/manage/apartments/{rentedApartmentId}")]
+        [HttpGet]
+        [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> GetSelectedRentedApartment(int? rentedApartmentId)
         {
             if (rentedApartmentId == null || !_rentedApartmentService.IsAnyRentedApartmentExist())
@@ -300,6 +308,8 @@ namespace FaturaTakip.Controllers
 
         [Authorize(Roles = "landlord,admin,moderator")]
         [Route("landlords/manage/tenants/add")]
+        [HttpGet]
+        [ApiExplorerSettings(IgnoreApi = true)]
         public IActionResult AddTenantIntoApartment()
         {
             SetViewBags();
@@ -309,6 +319,7 @@ namespace FaturaTakip.Controllers
         [Authorize(Roles = "landlord,admin,moderator")]
         [Route("landlords/manage/tenants/add")]
         [HttpPost]
+        [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> AddTenantIntoApartment([Bind("GovermentId")] Tenant tenant, [Bind("Id")] Apartment apartment)
         {
             //var tenantToAdd = await _context.Tenants.Where(t => t.GovermentId == tenant.GovermentId).FirstOrDefaultAsync();
@@ -349,6 +360,8 @@ namespace FaturaTakip.Controllers
         // GET: Landlords/Manage/Tenants/Delete/5
         [Authorize(Roles = "landlord,admin,moderator")]
         [Route("landlords/manage/tenants/delete/{tenantId}")]
+        [HttpGet]
+        [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> DeleteTenant(int? tenantId)
         {
             if (tenantId == null || !_tenantService.IsAnyTenantExist())            

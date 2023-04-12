@@ -138,7 +138,11 @@ namespace FaturaTakip.Controllers
             {
                 try
                 {
-                    await _tenantService.UpdateTenantAsync(tenant);
+                    var result = await _tenantService.UpdateTenantAsync(tenant);
+                    if (result.Success)
+                        _notyf.Success(result.Message);
+                    else
+                        _notyf.Error(result.Message);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
