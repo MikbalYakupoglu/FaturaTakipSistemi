@@ -6,9 +6,25 @@ namespace FaturaTakip.Core.Interceptors
     public abstract class MethodInterceptionBaseAttribute : Attribute, IInterceptor
     {
         public int Priority { get; set; }
-        public virtual void Intercept(IInvocation invocation)
+
+        public virtual async void Intercept(IInvocation invocation)
         {
-           
+            
         }
+
+        //public virtual void InterceptAsynchronous(IInvocation invocation)
+        //{
+            
+        //}
+
+        //public virtual void InterceptAsynchronous<TResult>(IInvocation invocation)
+        //{
+            
+        //}
+
+        //public virtual void InterceptSynchronous(IInvocation invocation)
+        //{
+            
+        //}
     }
 }

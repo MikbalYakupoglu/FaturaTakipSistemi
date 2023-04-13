@@ -1,4 +1,5 @@
-﻿using Core.Utilities.IoC;
+﻿using AspNetCoreHero.ToastNotification;
+using Core.Utilities.IoC;
 using FaturaTakip.Core.DependencyResolvers;
 
 namespace FaturaTakip.Core.Extensions

@@ -16,12 +16,15 @@ namespace FaturaTakip.Business.Concrete
     {
         private readonly IApartmentDal _apartmentDal;
         private readonly IMapper _mapper;
+        private readonly INotyfService _notyf;
         public ApartmentManager(IApartmentDal apartmentDal,
-            IMapper mapper
+            IMapper mapper,
+            INotyfService notyf
             )
         {
             _apartmentDal = apartmentDal;
             _mapper = mapper;
+            _notyf = notyf;
         }
 
         public async Task<DataResult<IEnumerable<ApartmentVM>>> GetAllApartmentsWithLandlordsAsync()

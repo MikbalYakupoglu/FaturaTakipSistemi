@@ -30,11 +30,6 @@ builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 builder.Host.ConfigureContainer<ContainerBuilder>(builder =>
     builder.RegisterModule(new AutofacBusinessModule()));
 
-
-builder.Services.AddDependencyResolvers(new ICoreModule[]
-{
-    new CoreModule()
-});
 // Add services to the container.
 
 builder.Services.AddTransient<NotificationAspectAttribute>();
@@ -50,9 +45,6 @@ builder.Services.AddScoped<IMessageDal, EfMessageDal>();
 builder.Services.AddScoped<IPaymentDal, EfPaymentDal>();
 
 
-
-
-
 builder.Services.AddDbContext<InvoiceTrackContext>();
 
 builder.Services.AddNotyf(config =>
@@ -63,7 +55,14 @@ builder.Services.AddNotyf(config =>
     config.HasRippleEffect = true;
 });
 
+builder.Services.AddDependencyResolvers(new ICoreModule[]
+{
+    new CoreModule()
+});
+
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+
 
 
 var container = new WindsorContainer();

@@ -128,9 +128,9 @@ namespace FaturaTakip.Controllers
             {
                 try
                 {
-                    //var result = await _apartmentService.UpdateApartmentAsync(apartment);
+                    var result = await _apartmentService.UpdateApartmentAsync(apartment);
 
-                    var result = _apartmentService.UpdateApartment(apartment);
+                    //var result = _apartmentService.UpdateApartment(apartment);
 
 
                     //if (result.Success)

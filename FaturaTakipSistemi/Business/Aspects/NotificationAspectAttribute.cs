@@ -5,6 +5,7 @@ using Core.Utilities.Interceptors;
 using Core.Utilities.IoC;
 using FaturaTakip.Core.Interceptors;
 using FaturaTakip.Utils.Results;
+using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
 
 namespace FaturaTakip.Business.Aspects;
@@ -13,15 +14,21 @@ public class NotificationAspectAttribute : MethodInterceptions
 {
     private readonly INotyfService _notyf;
 
-    public NotificationAspectAttribute() => _notyf = ServiceTool.ServiceProvider.GetService<INotyfService>();
+    public NotificationAspectAttribute() // TODO : Parametresiz olarak instance alma yolu bakılacak
+    {
+        _notyf = ServiceTool.ServiceProvider.GetService<INotyfService>();
+    }
 
     protected override async Task OnAfterAsync(IInvocation invocation)
     {
         try
         {
-            if (invocation.ReturnValue is SuccessResult result) // async olduğundan çalışmıyor
+            var serviceProvider = invocation.InvocationTarget?.GetType()?.GetProperty("ServiceProvider")?.GetValue(invocation.InvocationTarget) as IServiceProvider;
+            var notyf = serviceProvider.GetService<INotyfService>();
+
+            if (invocation.ReturnValue is SuccessResult successResult) // async olduğundan çalışmıyor
             {
-                _notyf.Success(result.Message);
+                _notyf.Success(successResult.Message);
             }
             else if (invocation.ReturnValue is ErrorResult errorResult)
             {
