@@ -72,7 +72,7 @@ namespace FaturaTakip.Business.Concrete
             
         }
 
-        [NotificationAspect]
+        
         public async Task<Result> AddApartmentAsync(Apartment apartmentToAdd)
         {
             var apartment = await _apartmentDal.GetAsync(a => a.Id == apartmentToAdd.Id);
@@ -90,7 +90,6 @@ namespace FaturaTakip.Business.Concrete
 
         }
 
-        [NotificationAspect]
         public async Task<Result> DeleteApartmentAsync(int apartmentId)
         {
             var apartmentToDelete = await _apartmentDal.GetAsync(a => a.Id == apartmentId);
@@ -104,7 +103,6 @@ namespace FaturaTakip.Business.Concrete
             return new SuccessResult(Messages.RemoveSuccess);
         }
 
-        [NotificationAspect]
         public async Task<Result> UpdateApartmentAsync(Apartment apartment)
         {
             var apartmentToUpdate = await _apartmentDal.GetAsync(a => a.Id == apartment.Id);
@@ -126,7 +124,6 @@ namespace FaturaTakip.Business.Concrete
             return new SuccessResult(Messages.UpdateSuccess);
         }
 
-        [NotificationAspect]
         public Result UpdateApartment(Apartment apartment)
         {
             var apartmentToUpdate = _apartmentDal.GetAsync(a => a.Id == apartment.Id).Result;

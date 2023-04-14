@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using AspNetCoreHero.ToastNotification;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Core.Utilities.IoC;
 

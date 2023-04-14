@@ -1,4 +1,6 @@
 ﻿using AspNetCoreHero.ToastNotification;
+using AspNetCoreHero.ToastNotification.Abstractions;
+using AspNetCoreHero.ToastNotification.Notyf;
 using Core.Utilities.IoC;
 using FaturaTakip.Core.DependencyResolvers;
 
@@ -14,6 +16,6 @@ namespace FaturaTakip.Core.Extensions
             }
 
             return ServiceTool.Create(serviceCollection);
-        }
+        }          
     }
 }

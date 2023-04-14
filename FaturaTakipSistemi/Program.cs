@@ -22,8 +22,12 @@ using Autofac.Extensions.DependencyInjection;
 using Autofac;
 using Castle.DynamicProxy;
 using FaturaTakip.Business.DependencyResolvers;
+using FaturaTakip.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+
 
 //Autofac
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
@@ -32,7 +36,6 @@ builder.Host.ConfigureContainer<ContainerBuilder>(builder =>
 
 // Add services to the container.
 
-builder.Services.AddTransient<NotificationAspectAttribute>();
 
 builder.Services.AddSingleton<CommonLocalizationService>();
 
@@ -47,6 +50,7 @@ builder.Services.AddScoped<IPaymentDal, EfPaymentDal>();
 
 builder.Services.AddDbContext<InvoiceTrackContext>();
 
+
 builder.Services.AddNotyf(config =>
 {
     config.DurationInSeconds = 5;
@@ -55,10 +59,15 @@ builder.Services.AddNotyf(config =>
     config.HasRippleEffect = true;
 });
 
-builder.Services.AddDependencyResolvers(new ICoreModule[]
-{
-    new CoreModule()
-});
+//builder.Services.AddSingleton<ReferenceFactory>();
+
+//builder.Services.AddDependencyResolvers(new ICoreModule[]
+//{
+//    new CoreModule()
+
+//});
+//builder.Services.AddTransient<NotificationAspectAttribute>();
+
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
@@ -83,9 +92,6 @@ foreach (var assembly in assemblies)
     ).LifestyleTransient());
 }
 
-//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-//builder.Services.AddDbContext<InvoiceTrackContext>(options =>
-//    options.UseSqlServer(connectionString));
 
 builder.Services.AddDefaultIdentity<InvoiceTrackUser>(options =>
 {

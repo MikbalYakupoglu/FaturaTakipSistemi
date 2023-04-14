@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Autofac.Extras.DynamicProxy;
 using Castle.DynamicProxy;
+using FaturaTakip.Business.Aspects;
 using FaturaTakip.Business.Concrete;
 using FaturaTakip.Business.Interface;
 using FaturaTakip.Core.Interceptors;
@@ -22,6 +23,7 @@ namespace FaturaTakip.Business.DependencyResolvers
             builder.RegisterType<ApartmentManager>().As<IApartmentService>().InstancePerLifetimeScope();
             builder.RegisterType<RentedApartmentManager>().As<IRentedApartmentService>().InstancePerLifetimeScope();
             builder.RegisterType<MessageManager>().As<IMessageService>().InstancePerLifetimeScope();
+
 
 
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();

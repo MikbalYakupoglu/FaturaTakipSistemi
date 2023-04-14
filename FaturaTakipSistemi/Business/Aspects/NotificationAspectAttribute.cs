@@ -4,8 +4,10 @@ using Castle.DynamicProxy;
 using Core.Utilities.Interceptors;
 using Core.Utilities.IoC;
 using FaturaTakip.Core.Interceptors;
+using FaturaTakip.Utils;
 using FaturaTakip.Utils.Results;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System.Threading.Tasks;
 
 namespace FaturaTakip.Business.Aspects;
@@ -23,9 +25,6 @@ public class NotificationAspectAttribute : MethodInterceptions
     {
         try
         {
-            var serviceProvider = invocation.InvocationTarget?.GetType()?.GetProperty("ServiceProvider")?.GetValue(invocation.InvocationTarget) as IServiceProvider;
-            var notyf = serviceProvider.GetService<INotyfService>();
-
             if (invocation.ReturnValue is SuccessResult successResult) // async olduğundan çalışmıyor
             {
                 _notyf.Success(successResult.Message);
