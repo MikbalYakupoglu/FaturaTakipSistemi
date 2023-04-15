@@ -66,7 +66,7 @@ builder.Services.AddNotyf(config =>
 //    new CoreModule()
 
 //});
-//builder.Services.AddTransient<NotificationAspectAttribute>();
+builder.Services.AddScoped<NotificationAspectAttribute>();
 
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

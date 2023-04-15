@@ -45,12 +45,6 @@ namespace Core.Utilities.Interceptors
 {
     public abstract class MethodInterceptions : MethodInterceptionBaseAttribute
     {
-        protected  virtual void OnBefore(IInvocation invocation) { }
-        protected virtual void OnAfter(IInvocation invocation) { }
-        protected virtual void OnException(IInvocation invocation, System.Exception e) { }
-        protected virtual void OnSuccess(IInvocation invocation) { }
-
-
         protected virtual async Task OnBeforeAsync(IInvocation invocation) { }
         protected virtual async Task OnAfterAsync(IInvocation invocation) { }
         protected virtual async Task OnExceptionAsync(IInvocation invocation, System.Exception e) { }

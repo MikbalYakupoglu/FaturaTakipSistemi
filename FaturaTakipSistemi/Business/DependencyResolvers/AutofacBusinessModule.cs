@@ -1,4 +1,5 @@
-﻿using Autofac;
+﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using Autofac;
 using Autofac.Extras.DynamicProxy;
 using Castle.DynamicProxy;
 using FaturaTakip.Business.Aspects;
@@ -16,7 +17,8 @@ namespace FaturaTakip.Business.DependencyResolvers
             //builder.Services.AddScoped<ILandlordService, LandlordManager>();
             //builder.Services.AddScoped<IApartmentService, ApartmentManager>();
             //builder.Services.AddScoped<IRentedApartmentService, RentedApartmentManager>();
-            //builder.Services.AddScoped<IMessageService, MessageManager>();
+            //builder.Services.AddScoped<IMessageService, MessageManager>();s
+
 
             builder.RegisterType<TenantManager>().As<ITenantService>().InstancePerLifetimeScope();
             builder.RegisterType<LandlordManager>().As<ILandlordService>().InstancePerLifetimeScope();
@@ -24,7 +26,11 @@ namespace FaturaTakip.Business.DependencyResolvers
             builder.RegisterType<RentedApartmentManager>().As<IRentedApartmentService>().InstancePerLifetimeScope();
             builder.RegisterType<MessageManager>().As<IMessageService>().InstancePerLifetimeScope();
 
-
+            //builder.RegisterType<NotificationAspectAttribute>().OnActivating(e =>
+            //{
+            //    var notyfService = e.Context.Resolve<INotyfService>();
+            //    e.Instance.NotyfService = notyfService;
+            //});
 
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
             builder.RegisterAssemblyTypes(assembly).AsImplementedInterfaces()
@@ -32,6 +38,7 @@ namespace FaturaTakip.Business.DependencyResolvers
             {
                 Selector = new AspectInterceptorSelector()
             }).SingleInstance();
+
 
         }
     }

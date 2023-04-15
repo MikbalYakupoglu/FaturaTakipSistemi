@@ -103,6 +103,7 @@ namespace FaturaTakip.Business.Concrete
             return new SuccessResult(Messages.RemoveSuccess);
         }
 
+        [NotificationAspect]
         public async Task<Result> UpdateApartmentAsync(Apartment apartment)
         {
             var apartmentToUpdate = await _apartmentDal.GetAsync(a => a.Id == apartment.Id);

@@ -10,6 +10,7 @@ using System.Linq;
 using System.Diagnostics;
 using FaturaTakip.Business.Interface;
 using AspNetCoreHero.ToastNotification.Abstractions;
+using FaturaTakip.Business.Aspects;
 
 namespace FaturaTakip.Controllers
 {
