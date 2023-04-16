@@ -16,65 +16,68 @@ using System.Reflection;
 
 namespace FaturaTakip.Business.Aspects;
 
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-public class NotificationAspectAttribute : TypeFilterAttribute
+public class NotificationAspectAttribute : MethodInterceptions
 {
-    public NotificationAspectAttribute() : base(typeof(NotyfMessageFilter))
-    {
-        
-    }
-    public class NotyfMessageFilter : MethodInterceptions
-    {
-        private readonly INotyfService _notyf;
-
-        public NotyfMessageFilter(INotyfService notyf)
-        {
-            _notyf = notyf;
-        }
-
-        protected override async Task OnAfterAsync(IInvocation invocation)
-        {
-            try
-            {
-                if (invocation.ReturnValue is SuccessResult successResult) // async olduğundan çalışmıyor
-                {
-                    _notyf.Success(successResult.Message);
-                }
-                else if (invocation.ReturnValue is ErrorResult errorResult)
-                {
-                    _notyf.Error(errorResult.Message);
-                }
-            }
-            catch (Exception)
-            {
-                _notyf.Error("An unexpected error occurred.");
-                throw;
-            }
-        }
-    }
-
-    //public NotificationAspectAttribute() // TODO : Parametresiz olarak instance alma yolu bakılacak
+    // TypeAttributes
+    //public NotificationAspectAttribute() : base(typeof(NotyfMessageFilter))
     //{
-    //    //_notyf = ServiceTool.ServiceProvider.GetService<INotyfService>();
+
     //}
-
-    //protected override async Task OnAfterAsync(IInvocation invocation)
+    //public class NotyfMessageFilter : MethodInterceptions
     //{
-    //    try
+    //private readonly INotyfService _notyf;
+
+    //    public NotyfMessageFilter(INotyfService notyf)
     //    {
-    //        if (invocation.ReturnValue is SuccessResult successResult) // async olduğundan çalışmıyor
+    //        _notyf = notyf;
+    //    }
+
+    //    protected override async Task OnAfterAsync(IInvocation invocation)
+    //    {
+    //        try
     //        {
-    //            _notyf.Success(successResult.Message);
+    //            if (invocation.ReturnValue is SuccessResult successResult) // async olduğundan çalışmıyor
+    //            {
+    //                _notyf.Success(successResult.Message);
+    //            }
+    //            else if (invocation.ReturnValue is ErrorResult errorResult)
+    //            {
+    //                _notyf.Error(errorResult.Message);
+    //            }
     //        }
-    //        else if (invocation.ReturnValue is ErrorResult errorResult)
+    //        catch (Exception)
     //        {
-    //            _notyf.Error(errorResult.Message);
+    //            _notyf.Error("An unexpected error occurred.");
+    //            throw;
     //        }
     //    }
-    //    catch (Exception)
-    //    {
-    //        _notyf.Error("An unexpected error occurred.");
-    //        throw;
-    //    }
     //}
+
+
+    private readonly INotyfService _notyf;
+
+    public NotificationAspectAttribute() // TODO : Parametresiz olarak instance alma yolu bakılacak
+    {
+        _notyf = ServiceTool.ServiceProvider.GetService<INotyfService>();
+    }
+
+    protected override async Task OnAfterAsync(IInvocation invocation)
+    {
+        try
+        {
+            if (invocation.ReturnValue is SuccessResult successResult) // async olduğundan çalışmıyor
+            {
+                _notyf.Success(successResult.Message);
+            }
+            else if (invocation.ReturnValue is ErrorResult errorResult)
+            {
+                _notyf.Error(errorResult.Message);
+            }
+        }
+        catch (Exception)
+        {
+            _notyf.Error("An unexpected error occurred.");
+            throw;
+        }
+    }
 }

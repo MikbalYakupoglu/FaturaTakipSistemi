@@ -103,7 +103,7 @@ namespace FaturaTakip.Business.Concrete
             return new SuccessResult(Messages.RemoveSuccess);
         }
 
-        [NotificationAspect]
+        //[NotificationAspect]
         public async Task<Result> UpdateApartmentAsync(Apartment apartment)
         {
             var apartmentToUpdate = await _apartmentDal.GetAsync(a => a.Id == apartment.Id);
@@ -125,26 +125,26 @@ namespace FaturaTakip.Business.Concrete
             return new SuccessResult(Messages.UpdateSuccess);
         }
 
-        public Result UpdateApartment(Apartment apartment)
-        {
-            var apartmentToUpdate = _apartmentDal.GetAsync(a => a.Id == apartment.Id).Result;
+        //public Result UpdateApartment(Apartment apartment)
+        //{
+        //    var apartmentToUpdate = _apartmentDal.GetAsync(a => a.Id == apartment.Id).Result;
 
-            if (apartment == null)
-                return new ErrorResult("Ev Bulunamadı.");
+        //    if (apartment == null)
+        //        return new ErrorResult("Ev Bulunamadı.");
 
-            if (apartment.Type == Data.Models.Type.None)
-                return new ErrorResult(Messages.TypeCannotBeNone);
+        //    if (apartment.Type == Data.Models.Type.None)
+        //        return new ErrorResult(Messages.TypeCannotBeNone);
 
-            apartmentToUpdate.FKLandlordId = apartment.FKLandlordId;
-            apartmentToUpdate.Block = apartment.Block;
-            apartmentToUpdate.Floor = apartment.Floor;
-            apartmentToUpdate.DoorNumber = apartment.DoorNumber;
-            apartmentToUpdate.Type = apartment.Type;
-            apartmentToUpdate.RentPrice = apartment.RentPrice;
+        //    apartmentToUpdate.FKLandlordId = apartment.FKLandlordId;
+        //    apartmentToUpdate.Block = apartment.Block;
+        //    apartmentToUpdate.Floor = apartment.Floor;
+        //    apartmentToUpdate.DoorNumber = apartment.DoorNumber;
+        //    apartmentToUpdate.Type = apartment.Type;
+        //    apartmentToUpdate.RentPrice = apartment.RentPrice;
 
-            _apartmentDal.UpdateAsync(apartmentToUpdate);
-            return new SuccessResult(Messages.UpdateSuccess);
-        }
+        //    _apartmentDal.UpdateAsync(apartmentToUpdate);
+        //    return new SuccessResult(Messages.UpdateSuccess);
+        //}
 
         public async Task<DataResult<Apartment>> GetApartmentByIdAsync(int? id) // Apartment -> Edit Custom Metotdan dolayı ViewModele convert edilmedi.
         {
